@@ -1,0 +1,27 @@
+{
+  "name": "Decider",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install_dep": "concurrently \"npm i\" \"cd client && npm i\"",
+    "server": "concurrently \"cd client && sudo npm start\" \"cd server && sudo nodemon server.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^4.1.0",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.6",
+    "react-bootstrap": "^1.0.0-beta.3",
+    "react-redux": "^6.0.0",
+    "react-router-dom": "^4.3.1",
+    "redux": "^4.0.1",
+    "validation": "0.0.1",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "react-scripts": "2.1.3"
+  }
+}
