@@ -1,7 +1,7 @@
 import React from 'react';
 import '../App.css';
 import { Link } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
+import { Button, Popover, OverlayTrigger } from 'react-bootstrap';
 
 import { connect } from 'react-redux';
 import toggle_menu from '../actions/toggle_menu';
@@ -80,6 +80,22 @@ class Scrollspy extends React.Component {
             </div>
         ) : null;
 
+        const popover_room = (
+            <Popover id="popover-basic">
+                <ul className="popover-menu">
+                    <li className="popover-menu-item">
+                        Active Rooms
+                    </li>
+                    <li className="popover-menu-item">
+                        My Rooms
+                    </li>
+                    <li className="popover-menu-item">
+                        Past Rooms
+                    </li>
+                </ul>
+            </Popover>
+        );
+
         return (
             <div>
                 <img
@@ -98,16 +114,26 @@ class Scrollspy extends React.Component {
                     className="sideNav bg-light"
                     ref="sideNav">
 
+                    <ul className="menu">
+                        <OverlayTrigger trigger="click" placement="right" overlay={popover_room}>
+                            <li className="menu-item">
+                                Room
+                            </li>
+                        </OverlayTrigger>
+                        <li className="menu-item">
+                            X-List
+                        </li>
+                    </ul>
+
                     <Button
-                        className="sideNav-item border border-primary rounded"
-                        variant="outline-primary"
+                        className="sideNav-item w-100"
                         onClick={this.room_toggle.bind(this)}>
                         Room
                     </Button>
                     {room_items}
 
                     <Button
-                        className="sideNav-item border border-primary rounded"
+                        className="sideNav-item border-primary w-100"
                         variant="outline-primary"
                         onClick={this.list_toggle.bind(this)}>
                         X-List

@@ -7,9 +7,11 @@ class MainContent extends React.Component {
             <div className="d-flex flex-column main-content main-content-without-footer">
 
                 {/* to set the flex-grow of first container to 1 as below is not applied!! */}
-                <CardContainer flex-grow-1 />
-                <hr style={{ width: "100%" }} />
-                <CardContainer />
+                <div className="h-100 d-flex flex-grow-1 flex-column">
+                    <CardContainer cards={[{ title: "abcd", date: "1234" }, { title: "abcd", date: "1234" }, { title: "abcd", date: "1234" }, { title: "abcd", date: "1234" }]} />
+                    <hr style={{ width: "100%" }} />
+                    <CardContainer cards={[{ title: "abcd", date: "1234" }]} />
+                </div>
 
             </div>
         );

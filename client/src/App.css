@@ -70,7 +70,7 @@ body{
 }
 
 .img-hamburger:hover {
-    background: #a1a0a0;
+    cursor: pointer;
 }
 
 @media (min-width: 800px) {
@@ -86,8 +86,8 @@ body{
 /*
     BEM : Block Element Modifier
 
-    placing this modifier above media query will not works as it is over-ridden by the style of the 
-    media query
+    placing this modifier above media query will not works as it is 
+    over-ridden by the style of the media query
 */
 
 .sideNav--show {
@@ -156,10 +156,80 @@ TODO : ADDING MEDIA QUERIES
 */
 
 .card {
-    width: 100px;
+    width: 150px;
     height: 100px;
-    box-shadow: 2px 2px 2px;
+    /*box-shadow: 2px 2px 2px;*/
     margin-right: 50px;
     margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
+}
+
+.card:hover {
+    background: #f46f6f;
+    cursor: pointer;
+}
+
+@media (min-width: 390px) and (max-width: 440px) {
+    .card{
+        width: 120px;
+    }
+}
+
+@media (min-width: 845px) {
+    .card{
+        height: 120px;
+    }
+}
+
+@media (min-width: 920px) {
+    .card{
+        width: 170px;
+    }
+}
+
+@media (min-width: 1100px) {
+    .card{
+        width: 210px;
+    }
+}
+
+.menu {
+    list-style-type: none;
+    width: 100%;
+    padding: 0;
+}
+
+.menu-item {
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+.menu-item:hover{
+    background: #4286f4;
+    cursor: pointer;
+}
+
+.popover-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    background: #f8f9fa;
+}
+
+.popover-menu-item {
+    padding: 15px;
+    padding-left: 20px;
+    padding-right: 30px;
+}
+
+.popover-menu-item:hover {
+    cursor: pointer;
+    background: #437db2;
+}
+
+.popover-body {
+    padding: 0;
 }
