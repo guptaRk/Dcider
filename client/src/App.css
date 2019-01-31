@@ -3,28 +3,38 @@ html, body, #root {
 }
 
 /*
-    as the header is out of the dom control and so, all the element in the body must start
-    from below the header. So, 'padding-top' is set to the height of the header
+    as the header is out of the dom control and 
+    so, all the element in the body must start
+    from below the header. 
+    So, 'padding-top' is set to the height of the header
+
+    overflow: hidden => the content will overFlow when user 
+    opens the sideNav in small devices and so, we restrict user
+    to see the content overflowed to the right
 */
 
 body{
     padding-top: 60px;
+    overflow: hidden;
 }
 
 /*
     Not-used here but is important!
 
-    setting the position to 'absolute' will make sure that the element is placed with respect 
-    to it's parent.
+    setting the position to 'absolute' will make sure 
+    that the element is placed with respect to it's parent.
 
-    Note that setting the top and left of absolute positioned element will set the position respect to
-    the entire window as long as the parent is static (i.e. according to the DOM).
-    The element is positioned with respect to the parent element and top&left property are also 
-    with respect to parent element if the parent is non-static (i.e. relative).
+    Note that setting the top and left of absolute positioned element will
+    set the position respect to the entire window as long as 
+    the parent is static (i.e. according to the DOM).
+    The element is positioned with respect to the parent element and 
+    top&left property are also with respect to parent element if the 
+    parent is non-static (i.e. relative).
 
-    Here, we set the top&left to zero. And if we want that the element is placed with respect to 
-    it's parent with the given top and left then we must have to make the parent to
-    non-static (i.e. position: relative;)
+    Here, we set the top&left to zero. 
+    And if we want that the element is placed with respect to 
+    it's parent with the given top and left then we must have 
+    to make the parent to non-static (i.e. position: relative;)
 */
 
 .sideNav {
@@ -52,9 +62,11 @@ body{
 }
 
 /*
-    To make the content appears just below the buttons, We first align the buttons to the 
-    center of the screen and then we make the nested-item to take the half width of the parent
-    and start this half width from the back side (so, "align-self: flex-end")
+    To make the content appears just below the buttons, 
+    We first align the buttons to the center of the screen 
+    and then we make the nested-item to take the half 
+    width of the parent and start this half width from the 
+    back side (so, "align-self: flex-end")
 */
 
 .nested-item {
@@ -86,8 +98,8 @@ body{
 /*
     BEM : Block Element Modifier
 
-    placing this modifier above media query will not works as it is 
-    over-ridden by the style of the media query
+    placing this modifier above media query will not works 
+    as it is over-ridden by the style of the media query
 */
 
 .sideNav--show {
@@ -123,6 +135,7 @@ body{
 .main-content-with-menu-closed {
     width: 100%;
     height: 100%;
+    padding-left: 0;
 }
 
 .main-content-with-menu-open {
@@ -139,12 +152,12 @@ body{
 }
 
 /*
-    This makes the main-content to take the remaining space (if available)
-    this just set the 'flex-grow: 1' 
+    This makes the main-content to take the remaining space 
+    (if available) this just set the 'flex-grow: 1' 
     by doing this we ensure that the footer is always at the bottom
 
-    To make it work the parent must have a display property of 'flex'. So, the div in 'App.js'
-    have classes 'd-flex flex-column'
+    To make it work the parent must have a display property of 'flex'. 
+    So, the div in 'App.js' have classes 'd-flex flex-column'
 */
 
 .main-content {
@@ -232,4 +245,8 @@ TODO : ADDING MEDIA QUERIES
 
 .popover-body {
     padding: 0;
+}
+
+.form-row {
+    margin-bottom: 15px;
 }

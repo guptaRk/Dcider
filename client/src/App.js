@@ -9,21 +9,45 @@ import toggle_menu from './actions/toggle_menu';
 
 class App extends Component {
 
+  eventListenerAction = (e) => {
+    const body = document.querySelector('body');
+
+    if (window.innerWidth < 800 && this.props.menu_disp === true)
+      this.props.toggle_menu();
+    else if (window.innerWidth >= 800 && this.props.menu_disp === false)
+      this.props.toggle_menu();
+
+    if (window.innerWidth <= 576)
+      body.style.width = (250 * (this.props.menu_disp ? 1 : 0)) + window.innerWidth + 'px';
+    else body.style.width = '100%';
+
+  };
+
   componentDidMount() {
     if (this.props.menu_disp === false && window.innerWidth >= 800)
       this.props.toggle_menu();
+
+    const body = document.querySelector('body');
+
+    if (window.innerWidth <= 576)
+      body.style.width = (250 * (this.props.menu_disp ? 1 : 0)) + window.innerWidth + 'px';
+    else body.style.width = '100%';
+
+    window.addEventListener('resize', this.eventListenerAction);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.eventListenerAction);
   }
 
   render() {
     return (
       <div
-        className={
-          (
-            this.props.menu_disp === true ?
-              "main-content-with-menu-open" :
-              "main-content-with-menu-closed"
-          ) + " d-flex flex-column h-100"
-        }>
+        className={"d-flex flex-column h-100 " +
+          ((this.props.menu_disp === true) ?
+            "main-content-with-menu-open" :
+            "main-content-with-menu-closed"
+          )}>
         <Header />
 
         <Scrollspy />
@@ -32,7 +56,7 @@ class App extends Component {
 
         <Footer />
         {/* yaha end */}
-      </div>
+      </div >
 
 
     );

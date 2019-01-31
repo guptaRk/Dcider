@@ -14,7 +14,7 @@ class CardContainer extends React.Component {
     getCardsJSX = (numberOfCardsToDisplay) => {
         return this.props.cards.map((card, ind) => {
             if (ind < numberOfCardsToDisplay)
-                return (<Card title={card.title} date={card.date} />);
+                return (<Card title={card.title} date={card.date} key={"card" + ind} />);
             return null;
         });
     }
