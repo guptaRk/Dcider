@@ -23,12 +23,16 @@ router.post('/create', auth, (req, res) => {
       const xlist = new XList({
         members: req.body.members,
         creator: req.body.creator,
-        name: req.body.name
+        name: req.body.name,
+        email: req.user.email
       });
 
       xlist.save()
         .then(result => {
-          res.send(result);
+          return res.send(result);
+        })
+        .catch(err => {
+          res.status(500).send(err);
         });
     })
     .catch(err => {
@@ -110,7 +114,6 @@ router.get('/others', auth, (req, res) => {
 router.get('/me/:name', auth, (req, res) => {
   XList.find({ name: req.params.name, creator: "me" })
     .then(xlist => {
-      console.log(xlist);
       if (xlist.length === 0)
         return res.status(400)
           .json({ "name": `XList: "${req.params.name}" doesn't exists` });
@@ -163,6 +166,9 @@ router.delete('/me/:name', auth, (req, res) => {
         .then(result => {
           res.json({ "result": "successfully deleted" });
         })
+        .catch(err => {
+          res.status(500).send(err);
+        });
     })
     .catch(err => {
       res.status(500).send(err);

@@ -10,7 +10,7 @@ module.exports = function (req, res, next) {
 
     // decode the token and add the data to the req
     // so that other functions can access them safely
-    req.user = payload;
+    req.user = payload.data;
   });
 
   //pass the control to the next middleware

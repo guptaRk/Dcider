@@ -90,14 +90,4 @@ router.post('/login', async (req, res) => {
 
 });
 
-/*
-  @route    GET api/users/XList/me
-  @descrp   get the list of all XList created by user
-  @access   protected
-*/
-router.get('/XList/me', auth, (req, res) => {
-  console.log(req.user);
-  res.send('OK');
-})
-
 module.exports = router;

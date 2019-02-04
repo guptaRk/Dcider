@@ -41,6 +41,19 @@ const xlistSchema = new mongoose.Schema({
     type: String,
     enum: ['me', 'room'],
     required: true
+  },
+
+  // To map the list to a specific user
+  email: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function (email) {
+        const regex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
+        return regex.test(email);
+      },
+      message: "Email is not valid"
+    }
   }
 });
 
