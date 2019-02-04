@@ -44,7 +44,7 @@ const xlistSchema = new mongoose.Schema({
   },
 
   // To map the list to a specific user
-  email: {
+  owner: {
     type: String,
     required: true,
     validate: {

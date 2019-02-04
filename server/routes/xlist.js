@@ -14,7 +14,11 @@ router.post('/create', auth, (req, res) => {
   if (error) return res.status(400).json(error);
 
   error = {};
-  XList.find({ name: req.body.name, creator: req.body.creator })
+  XList.find({
+    name: req.body.name,
+    creator: req.body.creator,
+    owner: req.user.email
+  })
     .then(result => {
       if (result.length !== 0)
         return res.status(400)
@@ -24,7 +28,7 @@ router.post('/create', auth, (req, res) => {
         members: req.body.members,
         creator: req.body.creator,
         name: req.body.name,
-        email: req.user.email
+        owner: req.user.email
       });
 
       xlist.save()
@@ -47,7 +51,7 @@ router.post('/create', auth, (req, res) => {
 */
 router.get('/me', auth, (req, res) => {
   XList
-    .find({ creator: 'me' })
+    .find({ creator: 'me', owner: req.user.email })
     .select(['name', 'members'])
 
     .then(xlists => {
@@ -80,7 +84,7 @@ router.get('/me', auth, (req, res) => {
 */
 router.get('/others', auth, (req, res) => {
   XList
-    .find({ creator: 'room' })
+    .find({ creator: 'room', owner: req.user.email })
     .select(['name', 'members'])
 
     .then(xlists => {
@@ -112,7 +116,7 @@ router.get('/others', auth, (req, res) => {
   @access   protected
 */
 router.get('/me/:name', auth, (req, res) => {
-  XList.find({ name: req.params.name, creator: "me" })
+  XList.find({ name: req.params.name, creator: "me", owner: req.user.email })
     .then(xlist => {
       if (xlist.length === 0)
         return res.status(400)
@@ -134,7 +138,7 @@ router.get('/me/:name', auth, (req, res) => {
   @access   protected
 */
 router.get('/others/:name', auth, (req, res) => {
-  XList.find({ name: req.params.name, creator: "room" })
+  XList.find({ name: req.params.name, creator: "room", owner: req.user.email })
     .then(xlist => {
       if (xlist.length === 0)
         return res.status(400)
@@ -156,7 +160,7 @@ router.get('/others/:name', auth, (req, res) => {
   @access   protected
 */
 router.delete('/me/:name', auth, (req, res) => {
-  XList.find({ name: req.params.name, creator: "me" })
+  XList.find({ name: req.params.name, creator: "me", owner: req.user.email })
     .then(xlist => {
       if (xlist.length === 0)
         return res.status(400)
