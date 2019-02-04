@@ -15,7 +15,7 @@ html, body, #root {
 
 body{
     padding-top: 60px;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 /*
@@ -39,13 +39,14 @@ body{
 
 .sideNav {
     top: 0;
-    left: -250px;
+    left:0;
     position: fixed;
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 250px;
-    justify-content: center;
+    /* To Hide the text when sideNav shrinks */
+    overflow-x: hidden;
 }
 
 .sideNav-item {
@@ -107,7 +108,7 @@ body{
 }
 
 .sideNav--hide {
-    left : -250px;
+    width: 70px;
 }
 
 .img-hamburger--show-shadow {
@@ -135,7 +136,7 @@ body{
 .main-content-with-menu-closed {
     width: 100%;
     height: 100%;
-    padding-left: 0;
+    padding-left: 70px;
 }
 
 .main-content-with-menu-open {
@@ -167,11 +168,10 @@ body{
 /*
 TODO : ADDING MEDIA QUERIES
 */
-
+/*
 .card {
     width: 150px;
     height: 100px;
-    /*box-shadow: 2px 2px 2px;*/
     margin-right: 50px;
     margin-bottom: 50px;
     display: flex;
@@ -207,6 +207,9 @@ TODO : ADDING MEDIA QUERIES
         width: 210px;
     }
 }
+*/
+
+/* For the sideNavigation menu and it's item */
 
 .menu {
     list-style-type: none;
@@ -215,37 +218,33 @@ TODO : ADDING MEDIA QUERIES
 }
 
 .menu-item {
-    padding: 10px;
+    display: flex;
+    flex-direction: row;
     width: 100%;
-    text-align: center;
+    padding: 10px;
 }
+
+.menu-item-icon {
+    width: 50px;
+}
+
+.menu-item-text {
+    width: 180px;
+    padding: 15px;
+}
+
+/* Used by the menu-item-text when the sideNav collapse */
+.set-width-0 {
+    width: 0px;
+}
+
+/* SIDENAVIGATION ENDS HERE */
 
 .menu-item:hover{
     background: #4286f4;
     cursor: pointer;
 }
 
-.popover-menu {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    background: #f8f9fa;
-}
-
-.popover-menu-item {
-    padding: 15px;
-    padding-left: 20px;
-    padding-right: 30px;
-}
-
-.popover-menu-item:hover {
-    cursor: pointer;
-    background: #437db2;
-}
-
-.popover-body {
-    padding: 0;
-}
 
 .form-row {
     margin-bottom: 15px;

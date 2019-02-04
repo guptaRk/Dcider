@@ -1,11 +1,11 @@
 import React from 'react';
-import Card from './Card';
+import Cards from './Card';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 
 import { connect } from 'react-redux';
 
-class CardContainer extends React.Component {
+class CardContainerForXList extends React.Component {
 
     state = {
         cardToDisplay: this.props.initialCardsToDisplay
@@ -14,7 +14,7 @@ class CardContainer extends React.Component {
     getCardsJSX = (numberOfCardsToDisplay) => {
         return this.props.cards.map((card, ind) => {
             if (ind < numberOfCardsToDisplay)
-                return (<Card title={card.title} date={card.date} key={"card" + ind} />);
+                return (<Cards title={card.title} dateCreated={card.date} key={"card" + ind} />);
             return null;
         });
     }
@@ -71,7 +71,7 @@ class CardContainer extends React.Component {
     }
 }
 
-CardContainer.propTypes = {
+CardContainerForXList.propTypes = {
     cards: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string.isRequired,
         date: PropTypes.instanceOf(Date).isRequired
@@ -85,4 +85,4 @@ const mapStateToProps = (state) => {
     };
 }
 
-export default connect(mapStateToProps)(CardContainer);
+export default connect(mapStateToProps)(CardContainerForXList);

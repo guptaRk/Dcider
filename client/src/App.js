@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Header from './components/Header';
-import Scrollspy from './components/Scrollspy';
+import Scrollspy from './components/SideNavigation';
 import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 

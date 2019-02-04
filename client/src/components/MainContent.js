@@ -2,6 +2,7 @@ import React from 'react';
 import CardContainer from './CardContainer';
 import RoomInit from './RoomInit';
 import KeyValuePairsInput from './KeyValuePairsInput';
+import Rooms from './Rooms';
 
 class MainContent extends React.Component {
     render() {
@@ -26,6 +27,8 @@ class MainContent extends React.Component {
                 {/*<KeyValuePairsInput
                     title="Get The Title From the RoomInit component"
                     items={5} />*/}
+
+                <Rooms />
 
             </div>
         );

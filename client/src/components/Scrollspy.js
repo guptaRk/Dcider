@@ -1,7 +1,6 @@
 import React from 'react';
 import '../App.css';
 import { Link } from 'react-router-dom';
-import { Button, Popover, OverlayTrigger } from 'react-bootstrap';
 
 import { connect } from 'react-redux';
 import toggle_menu from '../actions/toggle_menu';
@@ -14,23 +13,6 @@ class Scrollspy extends React.Component {
     }
 
     render() {
-
-        const popover_room = (
-            <Popover id="popover-basic">
-                <ul className="popover-menu">
-                    <li className="popover-menu-item">
-                        Active Rooms
-                    </li>
-                    <li className="popover-menu-item">
-                        My Rooms
-                    </li>
-                    <li className="popover-menu-item">
-                        Past Rooms
-                    </li>
-                </ul>
-            </Popover>
-        );
-
         return (
             <div>
                 <img
@@ -52,11 +34,10 @@ class Scrollspy extends React.Component {
                     ref="sideNav">
 
                     <ul className="menu">
-                        <OverlayTrigger trigger="click" placement="right" overlay={popover_room}>
-                            <li className="menu-item">
-                                Room
-                            </li>
-                        </OverlayTrigger>
+
+                        <li className="menu-item">
+                            Room
+                        </li>
                         <li className="menu-item">
                             X-List
                         </li>
