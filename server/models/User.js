@@ -1,6 +1,43 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
+const othersXlistSchema = new mongoose.Schema({
+  owner: {
+    type: String,
+    validate: {
+      validator: function (email) {
+        const regex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
+        return regex.test(email);
+      },
+      message: "Email is not valid"
+    },
+    required: true
+  },
+  lastUpdated: {
+    type: Date,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  xlist: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'xlist'
+  }
+});
+
+const myXlistSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  xlist: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'xlist'
+  }
+})
+
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -40,17 +77,12 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
-  XList: {
-    type: [{
-      creator: {
-        type: String,
-        required: true,
-        enum: ['me', 'room']
-      },
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'xlist'
-    }]
+  othersXlist: {
+    type: [othersXlistSchema]
   },
+  myXlist: {
+    type: [myXlistSchema]
+  }
 
   /*
   poll: [{
@@ -68,7 +100,8 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.getToken = function () {
   const payload = {
     name: this.name,
-    email: this.email
+    email: this.email,
+    _id: this._id
   };
   const token = jwt.sign({
     data: payload,

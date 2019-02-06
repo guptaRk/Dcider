@@ -3,7 +3,6 @@ const Joi = require('joi');
 module.exports = function (xlist) {
   const schema = {
     members: Joi.array().items(Joi.string().required().email()),
-    creator: Joi.string().valid(['me', 'room']).required(),
     name: Joi.string().required().regex(/^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/)
   };
 

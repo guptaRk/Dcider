@@ -37,12 +37,6 @@ const xlistSchema = new mongoose.Schema({
     required: true
   },
 
-  creator: {
-    type: String,
-    enum: ['me', 'room'],
-    required: true
-  },
-
   // To map the list to a specific user
   owner: {
     type: String,
@@ -54,6 +48,18 @@ const xlistSchema = new mongoose.Schema({
       },
       message: "Email is not valid"
     }
+  },
+
+  lastUpdated: {
+    type: Date,
+    required: true,
+    default: Date.now()
+  },
+
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true
   }
 });
 
