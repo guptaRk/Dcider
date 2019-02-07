@@ -11,7 +11,7 @@ const Fawn = require('fawn');
   @descrp   create a XList 
   @access   protected
 */
-router.post('/create', auth, (req, res) => {
+function createCallback(req, res) {
   let { error } = validateCreateListData(req.body);
   if (error) return res.status(400).json(error);
 
@@ -61,6 +61,50 @@ router.post('/create', auth, (req, res) => {
     .catch(err => {
       return res.status(500).send(err);
     })
+}
+router.post('/create', auth, createCallback);
+
+/*
+  @route    POST /api/xlist/others/clone/:name
+  @descrp   clone the specified Xlist into user's own Xlist
+  @access   protected
+*/
+router.post('/others/clone/:name', auth, (req, res) => {
+  //check whether a name is provided in the request body or not
+  const regex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
+  if (!req.params.name || !regex.test(req.params.name))
+    return res.status(400).json({ "name": "Provide a proper name to the Xlist" });
+
+  // check for collision with the alredy present lists
+  User.find({ email: req.user.email, "othersXlist.name": req.params.name })
+    .then(result => {
+      if (result.length === 0)
+        return res.status(400).json({ "xlist": "not a valid XList to clone" });
+
+      const namesList = result[0].myXlist.map(val => val.name);
+      if (namesList.includes(req.body.name))
+        return res.status(400).json({ "name": "There is already a Xlist with given name" });
+
+      const xlist = result[0].othersXlist.find((element) => {
+        return (element.name === req.params.name);
+      });
+      XList.find({ _id: xlist.xlist })
+        .then(xlist => {
+          req.body = {
+            "name": xlist[0].name,
+            "members": xlist[0].members
+          };
+          // Now, we have our xlist, just forward the request to /create
+          // actual redirecting is not a good idea. so, we have just used the function
+          return createCallback(req, res);
+        })
+        .catch(err => {
+          return res.status(500).send(err);
+        });
+    })
+    .catch(err => {
+      return res.status(500).send(err);
+    });
 });
 
 /*
