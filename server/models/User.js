@@ -36,7 +36,25 @@ const myXlistSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'xlist'
   }
-})
+});
+
+const pollItemSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  itemCount: {
+    type: Number,
+    required: true,
+    get: v => Math.round(v),
+    set: v => Math.round(v)
+  },
+  pollItem: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'pollItem'
+  }
+});
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -82,7 +100,11 @@ const userSchema = new mongoose.Schema({
   },
   myXlist: {
     type: [myXlistSchema]
-  }
+  },
+
+  pollItems: {
+    type: [pollItemSchema]
+  },
 
   /*
   poll: [{
@@ -114,3 +136,4 @@ userSchema.methods.getToken = function () {
 const User = mongoose.model('user', userSchema);
 
 module.exports.User = User;
+module.exports.pollItemSchemaForUser = pollItemSchema;
