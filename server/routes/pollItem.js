@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const validatePollItemData = require('../validation/pollItem');
 const { PollItem } = require('../models/PollItem');
-const { User, pollItemSchemaForUser } = require('../models/User');
+const { User } = require('../models/User');
 
 const auth = require('../middlewares/auth');
 const Fawn = require('fawn');
@@ -10,7 +10,7 @@ const Fawn = require('fawn');
 /*
   @route    POST api/pollItem/create
   @descrp   create a pollItem
-  @access   protected
+  @access   protected 
 */
 router.post('/create', auth, (req, res) => {
   let { error } = validatePollItemData(req.body);
@@ -28,15 +28,27 @@ router.post('/create', auth, (req, res) => {
         name: req.body.name,
         items: req.body.items
       });
-      const pollItemForUser = new pollItemSchemaForUser({
+      const pollItemForUser = {
         name: req.body.name,
         itemCount: req.body.items.length,
         pollItem: pollItem._id
-      });
+      };
+
+      /*pollItem.save()
+        .then(result => {
+          return res.send(result);
+        })
+        .catch(err => {
+          return res.status(500).send(err);
+        })*/
+      /*
+        CAUTION: the name of the collection 'pollitems' must be the same as when
+        we use "pollItem.save()". So, we can't use 'pollItem' as collection name
+      */
 
       const task = Fawn.Task();
       task
-        .save('pollItems', pollItem)
+        .save('pollitems', pollItem)
         .update('users', { email: req.user.email }, {
           $push: { "pollItems": pollItemForUser }
         })
@@ -49,6 +61,7 @@ router.post('/create', auth, (req, res) => {
         })
     })
     .catch(err => {
+      console.log(err);
       return res.status(500).send(err);
     });
 });
@@ -59,7 +72,7 @@ router.post('/create', auth, (req, res) => {
   @access   protected
 */
 router.get('/all', auth, (req, res) => {
-  User.find({ email: req.user.email }, { pollItem: 1 })
+  User.find({ email: req.user.email }, { pollItems: 1 })
     .then(result => {
       if (result.length === 0)
         return res.status(400).json({ "user": "user doesn't exists" });
@@ -73,21 +86,58 @@ router.get('/all', auth, (req, res) => {
 });
 
 /*
-  @route    GET api/pollItem/:name
+  @route    GET api/pollItem/get/:name
   @descrp   return the pollItem specified
   @access   protected
 */
-router.get('/:name', auth, (req, res) => {
-  PollItem.find({ owner: req.user.email, name: req.params.name })
+router.get('/get/:name', auth, (req, res) => {
+  PollItem.find()
     .then(result => {
+      console.log(result);
       // If there is no pollItem with that name
       if (result.length === 0)
-        return res.status(400).json({ "name": `pollItem ${req.params.name} doesn't exists` });
+        return res.status(400).json({ "name": `poll-item '${req.params.name}' doesn't exist` });
 
       return res.json({
         name: result[0].name,
         items: result[0].items
       });
+    })
+    .catch(err => {
+      return res.status(500).send(err);
+    });
+});
+
+/*
+  @route    DELETE api/pollItem/remove/:name
+  @descrp   delete the pollItem specified
+  @access   protected
+*/
+router.delete('/remove/:name', auth, (req, res) => {
+  User.find({ email: req.user.email }, { pollItems: 1 })
+    .then(result => {
+      if (result.length === 0)
+        return res.status(400).json({ "name": "no poll-items with given name" });
+
+      const newList = result[0].pollItems.filter(pollItem => {
+        return (pollItem.name !== req.params.name);
+      })
+      if (newList.length === result[0].pollItems.length)
+        return res.status(400).json({ "name": "no poll-items with given name" });
+
+      const task = Fawn.Task();
+      task
+        .remove("pollitems", { owner: req.user.email, name: req.params.name })
+        .update('users', { email: req.user.email }, {
+          $set: { pollItems: newList }
+        })
+        .run()
+        .then(result => {
+          return res.send(result);
+        })
+        .catch(err => {
+          return res.status(500).send(err);
+        })
     })
     .catch(err => {
       return res.status(500).send(err);
