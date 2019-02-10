@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const FormattedError = require('../common/ErrorFormat');
 
 module.exports = function (xlist) {
   const schema = {
@@ -8,14 +9,7 @@ module.exports = function (xlist) {
   console.log(xlist);
 
   const result = Joi.validate(xlist, schema);
-  let error = {};
-
-  if (result.error) {
-    for (let i of result.error.details) {
-      error[i.path[0]] = i.message;
-    }
-  }
-  else error = null;
+  let error = FormattedError(result.error);
 
   return { ...result, error };
 }

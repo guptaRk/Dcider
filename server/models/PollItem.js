@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 function validateObject(mssg, regex) {
   return {
-    validator: function (name) {
-      const reg = regex;
+    validator: (name) => {
+      const reg = new RegExp(regex);
       return reg.test(name);
     },
     message: mssg
@@ -16,7 +16,7 @@ const pollItemSchema = new mongoose.Schema({
     required: true,
     validate: validateObject(
       "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet",
-      /^([a-zA-Z])([a-zA-Z_0-9]){2,249}$/
+      "^([a-zA-Z])([a-zA-Z_0-9]){2,249}$"
     )
   },
 

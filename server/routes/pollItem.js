@@ -6,6 +6,7 @@ const { User } = require('../models/User');
 
 const auth = require('../middlewares/auth');
 const Fawn = require('fawn');
+const FormatValidationError = require('../common/ValidationErrorFormat');
 
 /*
   @route    POST api/pollItem/create
@@ -26,6 +27,7 @@ router.post('/create', auth, (req, res) => {
         owner: req.user.email,
         userId: req.user._id,
         name: req.body.name,
+        //name: "0abcd",
         items: req.body.items
       });
       const pollItemForUser = {
@@ -44,7 +46,15 @@ router.post('/create', auth, (req, res) => {
       /*
         CAUTION: the name of the collection 'pollitems' must be the same as when
         we use "pollItem.save()". So, we can't use 'pollItem' as collection name
+
+        Another Caution: Validation of schema takes place only at time of saving
+        i.e. if we use 'pollItem.save()' then only the PollItemSchema is going to 
+        run otherwise not!!
       */
+
+      pollItem.validate(err => {
+        if (err) return res.status(400).json(FormatValidationError(err));
+      })
 
       const task = Fawn.Task();
       task
@@ -58,7 +68,7 @@ router.post('/create', auth, (req, res) => {
         })
         .catch(err => {
           return res.status(500).json(err);
-        })
+        });
     })
     .catch(err => {
       console.log(err);

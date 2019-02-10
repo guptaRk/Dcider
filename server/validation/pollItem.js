@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const FormattedError = require('../common/ErrorFormat');
 
 module.exports = function validatePollItemData(data) {
   const schema = {
@@ -10,13 +11,8 @@ module.exports = function validatePollItemData(data) {
     }))
   };
 
-  let error = {};
   const result = Joi.validate(data, schema);
-  if (result.error)
-    for (let i of result.error.details) {
-      error[i.path[0]] = i.message;
-    }
-  else error = null;
+  let error = FormattedError(result.error);
 
   return { ...result, error };
 }

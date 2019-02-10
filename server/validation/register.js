@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const FormattedError = require('../common/ErrorFormat');
 
 module.exports = function (user) {
   const schema = {
@@ -8,12 +9,6 @@ module.exports = function (user) {
   };
   const result = Joi.validate(user, schema);
 
-  let error = {};
-  if (result.error) {
-    //console.log(result.error);
-    for (let i of result.error.details) {
-      error[i.path[0]] = i.message;
-    }
-  } else error = null;
+  let error = FormattedError(result.error);
   return { ...result, error };
 }
