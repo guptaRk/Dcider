@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
+function validateObject(mssg, regex) {
+  return {
+    validator: (name) => {
+      const reg = new RegExp(regex);
+      return reg.test(name);
+    },
+    message: mssg
+  };
+}
+
 const othersXlistSchema = new mongoose.Schema({
   owner: {
     type: String,
@@ -56,6 +66,46 @@ const pollItemSchema = new mongoose.Schema({
   }
 });
 
+const ownRoomSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    validate: validateObject(
+      "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet",
+      "^([a-zA-Z])([a-zA-Z_0-9]){2,249}$"
+    )
+  },
+  room: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'room'
+  }
+});
+
+const otherRoomSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    validate: validateObject(
+      "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet",
+      "^([a-zA-Z])([a-zA-Z_0-9]){2,249}$"
+    )
+  },
+  owner: {
+    type: String,
+    required: true,
+    validate: validateObject(
+      "Email is not valid",
+      "^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$"
+    )
+  },
+  room: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'room'
+  }
+});
+
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -105,6 +155,13 @@ const userSchema = new mongoose.Schema({
   pollItems: {
     type: [pollItemSchema]
   },
+
+  myRooms: {
+    type: [ownRoomSchema]
+  },
+  otherRooms: {
+    type: [otherRoomSchema]
+  }
 
   /*
   poll: [{
