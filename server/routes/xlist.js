@@ -62,6 +62,7 @@ function createCallback(req, res) {
       return res.status(500).send(err);
     })
 }
+// TODO: check whether all the users are valid or not?
 router.post('/create', auth, createCallback);
 
 /*

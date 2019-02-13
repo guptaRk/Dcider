@@ -20,30 +20,32 @@ const pollItemSchema = new mongoose.Schema({
     )
   },
 
-  items: {
+  keys: {
     type: [{
-      key: {
-        type: String,
-        required: true,
-        maxlength: 250,
-        trim: true,
-        validate: validateObject(
-          "key must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
-          /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
-        )
-      },
-      value: {
-        type: String,
-        required: true,
-        maxlength: 250,
-        validate: validateObject(
-          "value must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
-          /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
-        ),
-        trim: true
-      }
+      type: String,
+      required: true,
+      maxlength: 250,
+      trim: true,
+      validate: validateObject(
+        "key must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
+        /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
+      )
     }]
   },
+
+  values: {
+    type: [{
+      type: String,
+      required: true,
+      maxlength: 250,
+      validate: validateObject(
+        "value must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
+        /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
+      ),
+      trim: true
+    }],
+  },
+
 
   userId: {
     type: mongoose.Schema.Types.ObjectId,

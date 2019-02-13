@@ -28,11 +28,13 @@ router.post('/create', auth, (req, res) => {
         userId: req.user._id,
         name: req.body.name,
         //name: "0abcd",
-        items: req.body.items
+        keys: req.body.keys,
+        values: req.body.values
       });
+
       const pollItemForUser = {
         name: req.body.name,
-        itemCount: req.body.items.length,
+        itemCount: req.body.keys.length,
         pollItem: pollItem._id
       };
 
@@ -71,7 +73,6 @@ router.post('/create', auth, (req, res) => {
         });
     })
     .catch(err => {
-      console.log(err);
       return res.status(500).send(err);
     });
 });
@@ -103,14 +104,14 @@ router.get('/all', auth, (req, res) => {
 router.get('/get/:name', auth, (req, res) => {
   PollItem.find()
     .then(result => {
-      console.log(result);
       // If there is no pollItem with that name
       if (result.length === 0)
         return res.status(400).json({ "name": `poll-item '${req.params.name}' doesn't exist` });
 
       return res.json({
         name: result[0].name,
-        items: result[0].items
+        keys: result[0].keys,
+        values: result[0].values
       });
     })
     .catch(err => {
