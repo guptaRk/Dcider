@@ -4,104 +4,107 @@ const auth = require('../middlewares/auth');
 const validateCreateListData = require('../validation/createList');
 const { XList } = require('../models/XList');
 const { User } = require('../models/User');
+const { Room } = require('../models/Room');
 
-const Fawn = require('fawn');
 /*
   @route    POST api/xlist/create
   @descrp   create a XList 
   @access   protected
 */
-function createCallback(req, res) {
+const createXlistCallback = (req, res) => {
   let { error } = validateCreateListData(req.body);
   if (error) return res.status(400).json(error);
 
-  error = {};
-  XList.find({
-    name: req.body.name,
-    owner: req.user.email
-  })
-    .then(result => {
-      if (result.length !== 0)
-        return res.status(400)
-          .json({ "name": "XList of same name already exists" });
+  const xlistPromise = XList.find({ owner: req.user.email, name: req.body.name });
+  const membersPromise = User.find({ email: { $in: req.body.members } });
 
-      const xlist = new XList({
-        members: req.body.members,
+  Promise.all([
+    xlistPromise,
+    membersPromise
+  ])
+    .then(([xlist, members]) => {
+      // if there is already an xlist with same name
+      if (xlist.length) {
+        res.status(400).json({ "name": "XList of same name already exists" });
+        // To avoid promise nesting at the end we are returning a promise at the end. so, to differentiate we return null here
+        return null;
+      }
+
+      // if there is an invalid member in the member list
+      // TODO: add an option to filter the member list and send the request via email to join
+      if (members.length !== req.body.members.length) {
+        res.status(400).json({ "members": "All the members are not registered users" });
+        return null;
+      }
+
+      // if owner is not present in the list then add him
+      if (!req.body.members.includes(req.user.email))
+        req.body.members.push(req.user.email);
+
+      const newXlist = new XList({
         name: req.body.name,
         owner: req.user.email,
-        ownerId: req.user._id
+        lastUpdated: Date.now(),
+        members: req.body.members
       });
-
-      // get the reference to user through user-id
-      User.findById(req.user._id)
-        .then(user => {
-          // create a new transaction as in both places i.e.
-          // in user db and Xlist db, created Xlist must be stored
-          const task = Fawn.Task();
-          task
-            .update('users', { email: req.user.email }, {
-              $push: {
-                myXlist: { name: xlist.name, xlist: xlist._id }
-              }
-            })
-            .save('xlists', xlist)
-
-            .run()
-            .then(result => {
-              return res.send(result);
-            })
-            .catch(err => {
-              return res.status(500).send(err);
-            });
-        })
-        .catch(err => {
-          return res.status(500).send(err);
-        });
+      return newXlist.save();
     })
-    .catch(err => {
-      return res.status(500).send(err);
+    .then(result => {
+      // If the resonse is already sent to the client
+      if (!result) return;
+      return res.send(result);
     })
-}
-// TODO: check whether all the users are valid or not?
-router.post('/create', auth, createCallback);
+    .catch(err => res.status(500).send(err));
+};
+
+router.post('/create', auth, createXlistCallback);
 
 /*
   @route    POST /api/xlist/others/clone/:name
   @descrp   clone the specified Xlist into user's own Xlist
   @access   protected
 */
-router.post('/others/clone/:name', auth, (req, res) => {
-  //check whether a name is provided in the request body or not
-  const regex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
-  if (!req.params.name || !regex.test(req.params.name))
+router.post('/others/clone/:room', auth, (req, res) => {
+  //check whether a correct name is provided in the request body or not
+  const nameRegex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
+  if (!req.body.name || !nameRegex.test(req.body.name))
     return res.status(400).json({ "name": "Provide a proper name to the Xlist" });
 
-  // check for collision with the alredy present lists
-  User.find({ email: req.user.email, "othersXlist.name": req.params.name })
-    .then(result => {
-      if (result.length === 0)
-        return res.status(400).json({ "xlist": "not a valid XList to clone" });
+  // check whether a valid email is sent in the request body
+  const emailRegex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
+  if (!req.body.owner || !emailRegex.test(req.body.owner))
+    return res.status(400).json({ "owner": "Invalid email" });
 
-      const namesList = result[0].myXlist.map(val => val.name);
-      if (namesList.includes(req.body.name))
-        return res.status(400).json({ "name": "There is already a Xlist with given name" });
+  //check whether format of the room provided in the params is correct or not
+  if (!nameRegex.test(req.params.room))
+    return res.status(400).json({ "room": "Invalid room name" });
 
-      const xlist = result[0].othersXlist.find((element) => {
-        return (element.name === req.params.name);
-      });
-      XList.find({ _id: xlist.xlist })
-        .then(xlist => {
-          req.body = {
-            "name": xlist[0].name,
-            "members": xlist[0].members
-          };
-          // Now, we have our xlist, just forward the request to /create
-          // actual redirecting is not a good idea. so, we have just used the function
-          return createCallback(req, res);
-        })
-        .catch(err => {
-          return res.status(500).send(err);
-        });
+  const xlistPromise = XList.find({ owner: req.user.email, name: req.params.name });
+  const validMemberOfTheRoomPromise = Room.find({
+    owner: req.body.owner,
+    name: req.params.room,
+    xlist: req.user.email
+  });
+
+  Promise.all([
+    validMemberOfTheRoomPromise,
+    xlistPromise
+  ])
+    .then(([room, xlist]) => {
+      // check for collision with the alredy present lists
+      if (xlist.length)
+        return res.status(400).json({ "name": "xlist with same name already exist" });
+
+      // check whether the room is valid or not OR the user is a memeber of that room or not
+      if (!room.length)
+        return res.status(400).json({ "room": `not a valid room under user '${req.body.owner}'` });
+
+      // build the request body to make it suitable to forward the request to '/create'
+      req.body = {
+        name: req.body.name,
+        members: room[0].xlist
+      };
+      return createXlistCallback(req, res);
     })
     .catch(err => {
       return res.status(500).send(err);
@@ -114,28 +117,9 @@ router.post('/others/clone/:name', auth, (req, res) => {
   @access   protected
 */
 router.get('/me', auth, (req, res) => {
-  XList
-    .find({ owner: req.user.email })
-    .select(['name', 'members'])
-
+  XList.find({ owner: req.user.email }, { _id: 0, owner: 0 })
     .then(xlists => {
-      let data = [];
-      for (let i of xlists) {
-        // build the current XList to contains
-        // only the first few members and it's name
-        let cur = {
-          name: i.name,
-          members: [],
-          lastUpdated: i.lastUpdated
-        };
-
-        for (let j = 0; j < 3 && j < i.members.length; j++)
-          cur.members.push(i.members[j]);
-
-        data.push(cur);
-      }
-
-      return res.json(data);
+      return res.send(xlists);
     })
     .catch(err => {
       res.status(500).send(err);
@@ -148,24 +132,12 @@ router.get('/me', auth, (req, res) => {
   @access   protected
 */
 router.get('/others', auth, (req, res) => {
-  User.find({ email: req.user.email }, { othersXlist: 1 })
-
-    .then(result => {
-      const xlists = result[0].othersXlist;
-      let data = [];
-      for (let i of xlists) {
-        // build the current XList to contains
-        // only the first few members and it's name
-        let cur = {
-          name: i.name,
-          owner: i.owner,
-          lastUpdated: i.lastUpdated
-        };
-        data.push(cur);
-      }
-
-      return res.json(data);
-    })
+  XList.find(
+    {
+      members: req.user.email,
+      owner: { $ne: req.user.email }
+    }, { _id: 0 })
+    .then(xlists => res.send(xlists))
     .catch(err => {
       res.status(500).send(err);
     });
@@ -177,17 +149,12 @@ router.get('/others', auth, (req, res) => {
   @access   protected
 */
 router.get('/me/:name', auth, (req, res) => {
-  XList.find({ name: req.params.name, owner: req.user.email })
+  XList.find({ name: req.params.name, owner: req.user.email }, { _id: 0, owner: 0 })
     .then(xlist => {
       if (xlist.length === 0)
-        return res.status(400)
-          .json({ "name": `XList: "${req.params.name}" doesn't exists` });
+        return res.status(400).json({ "name": `XList: "${req.params.name}" doesn't exists` });
 
-      return res.json({
-        members: xlist[0].members,
-        name: xlist[0].name,
-        lastUpdated: xlist[0].lastUpdated
-      });
+      return res.send(xlist[0]);
     })
     .catch(err => {
       res.status(500).send(err);
@@ -200,26 +167,23 @@ router.get('/me/:name', auth, (req, res) => {
   @access   protected
 */
 router.get('/others/:name', auth, (req, res) => {
-  if (!req.params.name)
-    return res.status(400).json({ "name": "XList name is required" });
+  // check whether the pattern of the name is correct or not (avoid querying db)
+  const nameRegex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
+  if (!nameRegex.test(req.params.name))
+    return res.status(400).json({ "name": "Invalid xlist name" });
 
-  User.find({
-    email: req.user.email,
-    "othersXlist.name": req.params.name
-  })
-    .populate("othersXlist.xlist")
-    .then(result => {
-      if (result.length === 0)
-        return res.status(400)
-          .json({ "name": `XList: "${req.params.name}" doesn't exists` });
+  XList.find(
+    {
+      name: req.params.name,
+      members: req.user.email,
+      owner: { $ne: req.user.email }
+    }, { _id: 0 })
+    .then(xlists => {
+      if (xlists.length === 0)
+        return res.status(400).json({ "name": `XList: "${req.params.name}" doesn't exists` });
 
-      const xlist = result[0].xlists.xlist;
-      return res.json({
-        members: xlist.members,
-        name: xlist.name,
-        owner: xlist.owner,
-        lastUpdated: xlist.lastUpdated
-      });
+      // As there are multiple xlist with same name (as owners are different)
+      return res.send(xlists)
     })
     .catch(err => {
       res.status(500).send(err);
@@ -237,51 +201,68 @@ router.post('/me/:name', auth, (req, res) => {
   if (!regex.test(req.body.email))
     return res.status(400).json({ "email": "given email is not valid" });
 
+  // check whether the pattern of the name is correct or not (avoid querying db)
+  const nameRegex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
+  if (!nameRegex.test(req.params.name))
+    return res.status(400).json({ "name": "Invalid xlist name" });
+
   // find the XList with given name
-  console.log(req.user.email);
-  XList.find({
-    owner: req.user.email,
-    name: req.params.name
-  }).then(result => {
-    console.log(result);
-    if (result.length === 0) {
-      // XList with given name doesn't exist
-      return res.status(400).json({ "name": "XList with given name doesn't exists" });
-    }
-    // XLst with given name exist
-    const xlist = result[0];
-    //check if the member is already added in this list
-    if (xlist.members.includes(req.body.email))
-      return res.status(400).json({ "email": "user already added in this list" });
+  const xlistPromise = XList.find({ owner: req.user.email, name: req.params.name });
+  const validUserPromise = User.find({ email: req.body.email });
 
-    xlist.members.push(req.body.email);
-    xlist.lastUpdated = Date.now();
+  Promise.all([
+    validUserPromise,
+    xlistPromise
+  ])
+    .then(([user, result]) => {
+      // check whether the given use is registered or not
+      if (!user.length)
+        return res.status(400).json({ "user": "user not registered" });
 
-    XList.findOneAndUpdate({
-      owner: req.user.email,
-      name: req.params.name
-    }, { $set: xlist }, { new: true })
-      .then(result => {
-        return res.send(result);
-      })
-      .catch(err => {
-        return res.status(500).send(err);
-      })
-  })
+      if (result.length === 0) {
+        // XList with given name doesn't exist
+        res.status(400).json({ "name": "XList doesn't exists" });
+        return null;
+      }
+      // XLst with given name exist
+      const xlist = result[0];
+      //check if the member is already added in this list
+      if (xlist.members.includes(req.body.email)) {
+        res.status(400).json({ "email": "user already a member in this list" });
+        return null;
+      }
+
+      xlist.members.push(req.body.email);
+      xlist.lastUpdated = Date.now();
+
+      return XList.findOneAndUpdate(
+        {
+          owner: req.user.email,
+          name: req.params.name
+        }, {
+          $set: { lastUpdated: Date.now() },
+          $push: { members: req.body.email }
+        }, { new: true });
+    })
+    .then(result => {
+      // If the response is already sent to the client
+      if (!result) return;
+      return res.send(result);
+    })
     .catch(err => {
       res.status(500).send(err);
     });
 });
 
 /*
-  @route    DELETE /api/xlist/me/:name/:email
+  @route    POST /api/xlist/me/:name
   @descrp   delete the given email from the current XList
   @access   protected
 */
-router.delete('/me/:name/:email', auth, (req, res) => {
-  // validate the parameters
+router.post('/me/:name', auth, (req, res) => {
+  // validate the params and body parameters values
   const regex_email = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
-  if (!regex_email.test(req.params.email))
+  if (!regex_email.test(req.body.email))
     return res.status(400).json({ "email": "given email is not valid" });
 
   const regex_name = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
@@ -298,27 +279,32 @@ router.delete('/me/:name/:email', auth, (req, res) => {
     name: req.params.name
   })
     .then(result => {
-      if (result.length === 0)
-        return res.status(400).json({ "name": "specified XList doesn't exist" });
+      if (result.length === 0) {
+        res.status(400).json({ "name": "XList doesn't exist" });
+        return null;
+      }
 
       const xlist = result[0];
       //check whether the specified email is in member list or not
-      if (!xlist.members.includes(req.params.email))
-        return res.status(400).json({ "email": "specified user is not a memeber of this Xlist" });
+      if (!xlist.members.includes(req.body.email)) {
+        res.status(400).json({ "email": "user is not a memeber of this Xlist" });
+        return null;
+      }
 
-      xlist.members = xlist.members.filter(email => email !== req.params.email);
-      xlist.lastUpdated = Date.now();
+      // filter out the requested member
+      xlist.members = xlist.members.filter(email => email !== req.body.email);
 
-      XList.findOneAndUpdate({
-        owner: req.user.email,
-        name: req.params.name
-      }, { $set: xlist }, { new: true })
-        .then(result => {
-          return res.send(result);
-        })
-        .catch(err => {
-          return res.status(500).send(err);
-        })
+      return XList.findOneAndUpdate(
+        {
+          owner: req.user.email,
+          name: req.params.name
+        }, {
+          $set: { members: xlist.members, lastUpdated: Date.now() }
+        }, { new: true });
+    })
+    .then(result => {
+      if (!result) return;
+      res.send(result);
     })
     .catch(err => {
       res.status(500).send(err);
@@ -331,39 +317,17 @@ router.delete('/me/:name/:email', auth, (req, res) => {
   @access   protected
 */
 router.delete('/me/:name', auth, (req, res) => {
-  XList.find({ name: req.params.name, owner: req.user.email })
+  // check whether the pattern of the name is correct or not (avoid querying db)
+  const nameRegex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
+  if (!nameRegex.test(req.params.name))
+    return res.status(400).json({ "name": "Invalid xlist name" });
+
+  XList.findOneAndRemove({ name: req.params.name, owner: req.user.email })
     .then(xlist => {
-      if (xlist.length === 0)
-        return res.status(400)
-          .json({ "name": `XList: "${req.params.name}" doesn't exist` });
+      if (!xlist)
+        return res.status(400).json({ "name": `XList: "${req.params.name}" doesn't exist` });
 
-      //find the corresponding user and then update the info in it's list also
-      User.find({ email: req.user.email }, { myXlist: 1 })
-        .then(result => {
-          console.log(result);
-          //update the user's xlist array
-          const updatedXlist = result[0].myXlist.filter(val => {
-            // notice that toString() here is neccessary as the LHS and RHS
-            // are JavaScript objects and objects are compared with references
-            return val.xlist.toString() !== xlist[0]._id.toString();
-          });
-          console.log(updatedXlist);
-
-          const task = Fawn.Task();
-          task
-            .remove('xlists', { _id: xlist[0]._id })
-            .update('users', { email: req.user.email }, { $set: { myXlist: updatedXlist } })
-            .run()
-            .then(result => {
-              return res.send(result);
-            })
-            .catch(err => {
-              return res.status(500).send(err);
-            })
-        })
-        .catch(err => {
-          return res.status(500).send(err);
-        });
+      return res.json({ "result": "successfully deleted!" });
     })
     .catch(err => {
       res.status(500).send(err);

@@ -145,24 +145,6 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
-  othersXlist: {
-    type: [othersXlistSchema]
-  },
-  myXlist: {
-    type: [myXlistSchema]
-  },
-
-  pollItems: {
-    type: [pollItemSchema]
-  },
-
-  myRooms: {
-    type: [ownRoomSchema]
-  },
-  otherRooms: {
-    type: [otherRoomSchema]
-  }
-
   /*
   poll: [{
     type: mongoose.Schema.Types.ObjectId,

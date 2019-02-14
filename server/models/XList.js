@@ -55,12 +55,6 @@ const xlistSchema = new mongoose.Schema({
     required: true,
     default: Date.now()
   },
-
-  ownerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
-  }
 });
 
 const XList = mongoose.model('xlist', xlistSchema);

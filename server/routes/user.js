@@ -4,8 +4,6 @@ const { User } = require('../models/User');
 const validateLogin = require('../validation/login');
 const validateRegister = require('../validation/register');
 
-const auth = require('../middlewares/auth');
-
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 

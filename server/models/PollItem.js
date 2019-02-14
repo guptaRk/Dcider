@@ -46,12 +46,6 @@ const pollItemSchema = new mongoose.Schema({
     }],
   },
 
-
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
-  },
-
   owner: {
     type: String,
     trim: true,
@@ -60,6 +54,11 @@ const pollItemSchema = new mongoose.Schema({
       "Email is not valid",
       /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/
     )
+  },
+
+  lastUpdated: {
+    type: Date,
+    required: true
   }
 });
 
