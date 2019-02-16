@@ -123,6 +123,10 @@ body{
 ---- END OF MODIFIER ----
 */
 
+.not-logged-in{
+    padding-left: 0 !important;
+}
+
 .footer {
     width: 100%;
     padding: 10px;
@@ -248,4 +252,8 @@ TODO : ADDING MEDIA QUERIES
 
 .form-row {
     margin-bottom: 15px;
+}
+
+.div-hover--pointer:hover {
+    cursor: pointer;
 }

@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 /*
-  @route    POST api/users/login
+  @route    POST api/users/register
   @descrp   register a user and send the jwt
   @access   public
 */

@@ -1,17 +1,26 @@
 import React from 'react';
 import '../App.css';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import toggle_menu from '../actions/toggle_menu';
+import { logout } from '../actions/auth';
 
 class Scrollspy extends React.Component {
+  constructor(props) {
+    super(props);
+    this.logout = this.logout.bind(this);
+  }
+
+  logout(e) {
+    e.preventDefault();
+    this.props.logout(this.props.history);
+  }
 
   /*
     Dispatches the action to toggle the menu state
   */
   menu_toggle = () => {
-    console.log(this.props.toggle_menu + " : inside the scrollspy");
     this.props.toggle_menu();
   }
 
@@ -42,7 +51,7 @@ class Scrollspy extends React.Component {
           so that the items don't get hide beneath header */}
           <ul
             className="menu d-flex flex-column h-100"
-            style={{ marginTop: "60px" }}>
+            style={{ paddingTop: "60px" }}>
 
             <Link className="menu-item" to="/notes">
               <div className="menu-item-icon">
@@ -98,7 +107,7 @@ class Scrollspy extends React.Component {
 
             <div
               className="d-flex flex-column"
-              style={{ "margin-top": "auto" }}>
+              style={{ "marginTop": "auto" }}>
               <hr width="50px" />
 
               <Link className="menu-item" to="/help">
@@ -115,7 +124,7 @@ class Scrollspy extends React.Component {
               </Link>
 
               <Link className="menu-item" to="/">
-                <div className="menu-item-icon">
+                <div className="menu-item-icon" onClick={this.logout}>
                   <img
                     src={require('../images/logout.png')}
                     width="50px"
@@ -142,4 +151,5 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { toggle_menu })(Scrollspy);
+// use of withRouter is due to the fact that we need a history props
+export default withRouter(connect(mapStateToProps, { toggle_menu, logout })(Scrollspy));

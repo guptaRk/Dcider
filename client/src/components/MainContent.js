@@ -4,12 +4,14 @@ import RoomInit from './RoomInit';
 import KeyValuePairsInput from './KeyValuePairsInput';
 import Rooms from './Rooms';
 
-class MainContent extends React.Component {
-    render() {
-        return (
-            <div className="d-flex flex-column main-content main-content-without-footer">
+import NoMatch from './NoMatch';
+import Login from './Login';
+import Register from './Register';
+import { Switch, Route } from 'react-router';
 
-                {/*<div className="h-100 d-flex flex-grow-1 flex-column">
+class MainContent extends React.Component {
+  render() {
+    /*<div className="h-100 d-flex flex-grow-1 flex-column">
                     <CardContainer
                         cards={[{ title: "abcd", date: "1234" },
                         { title: "abcd", date: "1234" },
@@ -20,19 +22,26 @@ class MainContent extends React.Component {
 
                     <CardContainer
                         cards={[{ title: "abcd", date: "1234" }]} />
-                </div>*/}
+                </div>
 
-                {/* <RoomInit /> */}
+                <RoomInit />
 
-                {/*<KeyValuePairsInput
+                <KeyValuePairsInput
                     title="Get The Title From the RoomInit component"
-                    items={5} />*/}
+                    items={5} />
 
-                <Rooms />
+        <Rooms />*/
 
-            </div>
-        );
-    }
+    return (
+      <div className="d-flex flex-column main-content main-content-without-footer">
+        <Switch>
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/register" component={Register} />
+          <Route component={NoMatch} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 export default MainContent;
