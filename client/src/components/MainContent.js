@@ -8,6 +8,9 @@ import NoMatch from './NoMatch';
 import Login from './Login';
 import Register from './Register';
 import { Switch, Route } from 'react-router';
+import PrivateRoute from './common/PrivateRoute';
+import XlistCardContainer from './XlistCardContainer';
+import XlistDisplay from './XlistDisplay';
 
 class MainContent extends React.Component {
   render() {
@@ -37,6 +40,8 @@ class MainContent extends React.Component {
         <Switch>
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
+          <PrivateRoute exact path="/xlist" component={XlistCardContainer} />
+          <PrivateRoute exact path="/xlist/:type/:name" component={XlistDisplay} />
           <Route component={NoMatch} />
         </Switch>
       </div>

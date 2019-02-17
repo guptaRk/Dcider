@@ -22,10 +22,13 @@ class Login extends React.Component {
   }
 
   render() {
-    let { error, isAuthenticated } = this.props.auth;
+    const { error, isAuthenticated } = this.props.auth;
+    console.log(this.props);
+    // to redirect to the same page the user is coming
+    const { from } = this.props.location.state || { from: '/me' };
 
     if (isAuthenticated) {
-      return <Redirect to="/me" />
+      return <Redirect to={from} />
     }
     return (
       <div>

@@ -119,7 +119,20 @@ router.post('/others/clone/:room', auth, (req, res) => {
 router.get('/me', auth, (req, res) => {
   XList.find({ owner: req.user.email }, { _id: 0, owner: 0 })
     .then(xlists => {
-      return res.send(xlists);
+      const lightWeightXlists = [];
+
+      for (let xlist of xlists) {
+        let cur = {
+          lastUpdated: xlist.lastUpdated,
+          name: xlist.name,
+          members: []
+        };
+        for (let i = 0; i < Math.min(3, xlist.members.length); i++)
+          cur.members.push(xlist.members[i]);
+        lightWeightXlists.push(cur);
+      }
+
+      return res.json(lightWeightXlists);
     })
     .catch(err => {
       res.status(500).send(err);
@@ -137,7 +150,23 @@ router.get('/others', auth, (req, res) => {
       members: req.user.email,
       owner: { $ne: req.user.email }
     }, { _id: 0 })
-    .then(xlists => res.send(xlists))
+    .then(xlists => {
+      const lightWeightXlists = [];
+
+      for (let xlist of xlists) {
+        let cur = {
+          lastUpdated: xlist.lastUpdated,
+          name: xlist.name,
+          owner: xlist.owner,
+          members: []
+        };
+        for (let i = 0; i < Math.min(3, xlist.members.length); i++)
+          cur.members.push(xlist.members[i]);
+        lightWeightXlists.push(cur);
+      }
+
+      return res.json(lightWeightXlists);
+    })
     .catch(err => {
       res.status(500).send(err);
     });
@@ -255,11 +284,11 @@ router.post('/me/:name', auth, (req, res) => {
 });
 
 /*
-  @route    POST /api/xlist/me/:name
+  @route    POST /api/xlist/me/remove/:name/
   @descrp   delete the given email from the current XList
   @access   protected
 */
-router.post('/me/:name', auth, (req, res) => {
+router.post('/me/remove/:name', auth, (req, res) => {
   // validate the params and body parameters values
   const regex_email = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
   if (!regex_email.test(req.body.email))
@@ -270,7 +299,7 @@ router.post('/me/:name', auth, (req, res) => {
     return res.status(400).json({ "name": "given name is not valid" });
 
   // check whether it's an attempt to delete the owner itself
-  if (req.params.email === req.user.email)
+  if (req.body.email === req.user.email)
     return res.status(400).json({ "email": "The owner can't be deleted" });
 
   //find the current XList

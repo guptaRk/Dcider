@@ -20,7 +20,7 @@ class Register extends React.Component {
     const name = this.refs.name.value;
     const password2 = this.refs.password2.value;
 
-    if (password != password2) {
+    if (password !== password2) {
       this.props.authError({ "password2": "password doesn't match" });
       return;
     }

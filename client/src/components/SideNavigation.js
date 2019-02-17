@@ -14,7 +14,8 @@ class Scrollspy extends React.Component {
 
   logout(e) {
     e.preventDefault();
-    this.props.logout(this.props.history);
+    this.props.logout();
+    this.props.history.push('/login');
   }
 
   /*
@@ -53,23 +54,23 @@ class Scrollspy extends React.Component {
             className="menu d-flex flex-column h-100"
             style={{ paddingTop: "60px" }}>
 
-            <Link className="menu-item" to="/notes">
+            <Link className="menu-item" to="/rooms">
               <div className="menu-item-icon">
                 <img
-                  src={require('../images/notes.png')}
+                  src={require('../images/r.png')}
                   width="50px"
                   alt="notes"
                   height="50px" />
               </div>
               {(open ? (<div className="menu-item-text">
-                Notes
+                Rooms
               </div>) : null)}
             </Link>
 
             <Link className="menu-item" to="/xlist">
               <div className="menu-item-icon">
                 <img
-                  src={require('../images/xlist.png')}
+                  src={require('../images/x.png')}
                   width="50px"
                   alt="notes"
                   height="50px" />
@@ -79,29 +80,16 @@ class Scrollspy extends React.Component {
               </div>) : null)}
             </Link>
 
-            <Link className="menu-item" to="/template">
+            <Link className="menu-item" to="/poll-items">
               <div className="menu-item-icon">
                 <img
-                  src={require('../images/template.png')}
+                  src={require('../images/p.png')}
                   width="50px"
                   alt="notes"
                   height="50px" />
               </div>
               {(open ? (<div className="menu-item-text">
-                Template
-              </div>) : null)}
-            </Link>
-
-            <Link className="menu-item" to="/changeIt">
-              <div className="menu-item-icon">
-                <img
-                  src={require('../images/template.png')}
-                  width="50px"
-                  alt="notes"
-                  height="50px" />
-              </div>
-              {(open ? (<div className="menu-item-text">
-                ChangeItAndIcon
+                Poll-Items
               </div>) : null)}
             </Link>
 
@@ -131,7 +119,7 @@ class Scrollspy extends React.Component {
                     alt="notes"
                     height="50px" />
                 </div>
-                {(open ? (<div className="menu-item-text">
+                {(open ? (<div className="menu-item-text" onClick={this.logout}>
                   Log Out
                 </div>) : null)}
               </Link>

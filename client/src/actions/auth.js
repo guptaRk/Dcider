@@ -13,6 +13,7 @@ export const login = (email, password) => {
 
         // set the token in header of every outgoing request
         server.defaults.headers["x-auth-token"] = (response.headers["x-auth-token"]);
+        console.log('server : ', server);
 
         dispatch(successfulLogin(response.data));
       })
@@ -38,7 +39,7 @@ export const register = (name, email, password) => {
         localStorage.setItem('x-auth-token', response.headers["x-auth-token"]);
 
         // set the token in header of every outgoing request
-        server.defaults.headers["x-auth-token"] = (response.headers["x-auth-token"]);
+        server.defaults.headers['x-auth-token'] = response.headers['x-auth-token'];
 
         dispatch(successfulLogin(response.data));
       })
@@ -60,21 +61,21 @@ export const authError = (data) => {
 }
 
 export const successfulLogin = (data) => {
+  // set the token in header of every outgoing request
+  server.defaults.headers["x-auth-token"] = localStorage.getItem('x-auth-token');
+
   return {
     type: LOGIN_SUCCESS,
     payload: data
   }
 }
 
-export const logout = (history) => {
+export const logout = () => {
   //remove the token from the localstorage
   if (localStorage.getItem('x-auth-token')) localStorage.removeItem('x-auth-token');
 
   //remove the token from the header of the sent requests
   server.defaults.headers['x-auth-token'] = null;
-
-  // redirect user to the login page
-  history.push('/login');
 
   return {
     type: LOGOUT

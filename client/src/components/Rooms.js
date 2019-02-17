@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tab, Tabs, CardColumns } from 'react-bootstrap';
-import Cards from './Card';
+import Cards from './common/Card';
 import { Redirect } from 'react-router-dom';
 import Scrollspy from './Scrollspy';
 
