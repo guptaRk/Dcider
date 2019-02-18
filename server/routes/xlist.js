@@ -145,27 +145,28 @@ router.get('/me', auth, (req, res) => {
   @access   protected
 */
 router.get('/others', auth, (req, res) => {
-  XList.find(
+  Room.find(
     {
-      members: req.user.email,
+      xlist: req.user.email,
       owner: { $ne: req.user.email }
     }, { _id: 0 })
-    .then(xlists => {
-      const lightWeightXlists = [];
+    .then(rooms => {
+      console.log(rooms);
+      const returnedXlist = [];
 
-      for (let xlist of xlists) {
+      for (let room of rooms) {
         let cur = {
-          lastUpdated: xlist.lastUpdated,
-          name: xlist.name,
-          owner: xlist.owner,
+          lastUpdated: room.lastUpdated,
+          name: room.name,
+          owner: room.owner,
           members: []
         };
-        for (let i = 0; i < Math.min(3, xlist.members.length); i++)
-          cur.members.push(xlist.members[i]);
-        lightWeightXlists.push(cur);
+        for (let i = 0; i < Math.min(3, room.xlist.length); i++)
+          cur.members.push(room.xlist[i]);
+        returnedXlist.push(cur);
       }
 
-      return res.json(lightWeightXlists);
+      return res.json(returnedXlist);
     })
     .catch(err => {
       res.status(500).send(err);
@@ -191,31 +192,85 @@ router.get('/me/:name', auth, (req, res) => {
 });
 
 /*
-  @route    GET /api/xlist/others/:name
+  @route    GET /api/xlist/others/:name/:owner
   @descrp   get the Xlist specified XList
   @access   protected
 */
-router.get('/others/:name', auth, (req, res) => {
+router.get('/others/:room/:owner', auth, (req, res) => {
   // check whether the pattern of the name is correct or not (avoid querying db)
+  const nameRegex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
+  if (!nameRegex.test(req.params.room))
+    return res.status(400).json({ "name": "Invalid room name" });
+
+  // check the owner's email address format befor db query
+  const emailRegex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
+  if (!req.params.owner || !emailRegex.test(req.params.owner))
+    return res.status(400).json({ "owner": "Invalid email" });
+
+  Room.find(
+    {
+      name: req.params.room,
+      xlist: req.user.email,
+      owner: req.params.owner
+    }, { _id: 0, xlist: 1, lastUpdated: 1, name: 1, owner: 1 })
+    .then(rooms => {
+      if (rooms.length === 0)
+        return res.status(400).json({ "name": `Room: "${req.params.room}" doesn't exists` });
+
+      // As there are multiple xlist with same name (as owners are different)
+      return res.json({
+        name: rooms[0].name,
+        members: rooms[0].xlist,
+        lastUpdated: rooms[0].lastUpdated,
+        owner: rooms[0].owner
+      });
+    })
+    .catch(err => {
+      res.status(500).send(err);
+    })
+});
+
+/*
+  @route    POST /api/xlist/me/:name/edit-name/:newName
+  @descrp   rename the xlist
+  @access   protected
+*/
+router.post('/me/:name/edit-name/:newName', auth, (req, res) => {
+  // validate the newName and name format before db query
   const nameRegex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
   if (!nameRegex.test(req.params.name))
     return res.status(400).json({ "name": "Invalid xlist name" });
 
-  XList.find(
-    {
-      name: req.params.name,
-      members: req.user.email,
-      owner: { $ne: req.user.email }
-    }, { _id: 0 })
-    .then(xlists => {
-      if (xlists.length === 0)
-        return res.status(400).json({ "name": `XList: "${req.params.name}" doesn't exists` });
+  if (!nameRegex.test(req.params.newName))
+    return res.status(400).json({ "name": "Invalid xlist name" });
 
-      // As there are multiple xlist with same name (as owners are different)
-      return res.send(xlists)
+  console.log(req.params.name);
+  XList.find({
+    owner: req.user.email,
+    name: { $in: [req.params.name, req.params.newName] }
+  })
+    .then(xlists => {
+      console.log(xlists);
+      if (!xlists.length) {
+        res.status(400).json({ "name": "No such Xlist exists" });
+        return null;
+      }
+
+      for (let xlist of xlists)
+        if (xlist.name === req.params.newName) {
+          res.status(400).json({ "name": "Xlist with same name already exists!" });
+          return null;
+        }
+
+      return XList.findByIdAndUpdate(xlists[0]._id, { $set: { name: req.params.newName } });
+    })
+    .then(result => {
+      // check if the request is already handled
+      if (!result) return;
+      return res.json(result);
     })
     .catch(err => {
-      res.status(500).send(err);
+      return res.status(500).send(err);
     })
 });
 
@@ -246,7 +301,7 @@ router.post('/me/:name', auth, (req, res) => {
     .then(([user, result]) => {
       // check whether the given use is registered or not
       if (!user.length)
-        return res.status(400).json({ "user": "user not registered" });
+        return res.status(400).json({ "email": "user not registered" });
 
       if (result.length === 0) {
         // XList with given name doesn't exist

@@ -11,9 +11,12 @@ import { withRouter } from 'react-router';
 import { successfulLogin } from './actions/auth';
 import store from './store';
 
+import jwt_decode from 'jwt-decode';
+
 if (localStorage.getItem('x-auth-token')) {
-  console.log(localStorage.getItem('x-auth-token'), ", ", store);
-  store.dispatch(successfulLogin());
+  const payload = jwt_decode(localStorage.getItem('x-auth-token'));
+  //console.log("app: ", payload);
+  store.dispatch(successfulLogin(payload.data));
 }
 
 class App extends Component {

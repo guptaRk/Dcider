@@ -1,0 +1,13 @@
+Uncontrolled inputs and controlled inputs => A <input> element may be any one of them not both i.e. during entire lifecycle of the element the input element must not changes it's type i.e. either from controlled to Uncontrolled OR from Uncontrolled to controlled input element
+
+sending props using <Redirect> => 
+<Redirect 
+  to = {{ 
+    pathname: "..", 
+    state: {myPropsName: myPropValue}
+  }}
+  push={true}..../>
+
+  this state object is accessible using "this.props.location.state.myPropsName" AND remember we must have access to the 'location' props in that component and for that we might have to wrap our component in some higher order component 'withRouter()'
+
+  

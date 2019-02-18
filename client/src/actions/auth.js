@@ -61,6 +61,7 @@ export const authError = (data) => {
 }
 
 export const successfulLogin = (data) => {
+  console.log("successful login", data);
   // set the token in header of every outgoing request
   server.defaults.headers["x-auth-token"] = localStorage.getItem('x-auth-token');
 
