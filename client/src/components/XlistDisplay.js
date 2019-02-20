@@ -4,7 +4,6 @@ import { logout } from '../actions/auth';
 import { connect } from 'react-redux';
 import { Form, InputGroup, ListGroup, Button } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
-import { watchFile } from 'fs';
 
 class XlistDisplay extends React.Component {
   // After unmounting it may happens that some async task get completed and corresponding callback is called and we are using setState inside that and hence it leads to memory leak. So, to avoid such things we have to abort the callbacks (prevent them from using setState)

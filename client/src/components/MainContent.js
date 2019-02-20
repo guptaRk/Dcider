@@ -11,6 +11,7 @@ import { Switch, Route } from 'react-router';
 import PrivateRoute from './common/PrivateRoute';
 import XlistCardContainer from './XlistCardContainer';
 import XlistDisplay from './XlistDisplay';
+import RoomsContainer from './RoomsContainer';
 
 class MainContent extends React.Component {
   render() {
@@ -42,6 +43,7 @@ class MainContent extends React.Component {
           <Route exact path="/register" component={Register} />
           <PrivateRoute exact path="/xlist" component={XlistCardContainer} />
           <PrivateRoute exact path="/xlist/:type/:name" component={XlistDisplay} />
+          <PrivateRoute exact path="/room" component={RoomsContainer} />
           <Route component={NoMatch} />
         </Switch>
       </div>

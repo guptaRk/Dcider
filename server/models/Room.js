@@ -122,6 +122,7 @@ const roomSchema = new mongoose.Schema({
     }]
   },
 
+  // for the Gale Shapley algorithm
   cntKeys: {
     type: mongoose.Schema.Types.Mixed,
     validate: {

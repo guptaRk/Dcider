@@ -43,7 +43,7 @@ class FormInputSelectGroup extends React.Component {
   }
 }
 
-FormInputSelectGroup.PropTypes = {
+FormInputSelectGroup.propTypes = {
   label: PropTypes.string.isRequired,
   titleForDropdown: PropTypes.string.isRequired
 };

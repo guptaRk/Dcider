@@ -54,7 +54,7 @@ class Scrollspy extends React.Component {
             className="menu d-flex flex-column h-100"
             style={{ paddingTop: "60px" }}>
 
-            <Link className="menu-item" to="/rooms">
+            <Link className="menu-item" to="/room">
               <div className="menu-item-icon">
                 <img
                   src={require('../images/r.png')}
