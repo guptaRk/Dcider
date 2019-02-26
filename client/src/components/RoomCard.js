@@ -22,8 +22,13 @@ class RoomCard extends React.Component {
 
   render() {
     return (
-      <Card border={this.props.borderColor} className="mt-3" style={{ cursor: "pointer" }}>
-        <Card.Header>{this.props.title}</Card.Header>
+      // ID is used at the time of click to grab the name and owner
+      <Card
+        border={this.props.borderColor}
+        className="mt-3"
+        style={{ cursor: "pointer" }}
+        id={`${this.props.name}$$${this.props.owner}`}>
+        <Card.Header>{this.props.name}</Card.Header>
         <Card.Body>
           {this.props.type === 'others' &&
             <p className="border border-info p-2 text-dark bg-light">
@@ -57,7 +62,7 @@ class RoomCard extends React.Component {
 }
 
 RoomCard.propTypes = {
-  title: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
   lastUpdated: PropTypes.instanceOf(Date).isRequired,
   type: PropTypes.oneOf(['me', 'others']).isRequired,
   owner: PropTypes.string.isRequired,

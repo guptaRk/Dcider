@@ -10,4 +10,10 @@ sending props using <Redirect> =>
 
   this state object is accessible using "this.props.location.state.myPropsName" AND remember we must have access to the 'location' props in that component and for that we might have to wrap our component in some higher order component 'withRouter()'
 
+
+
+  https://stackoverflow.com/questions/20851533/react-js-wrapping-one-component-into-another/31564812#31564812
+
+Passing a JSX as props in a react component (In our app we have used this technique to pass the content of a modal body into the Modal component)
+
   

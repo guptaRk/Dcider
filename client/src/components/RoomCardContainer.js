@@ -23,10 +23,23 @@ class RoomCardContainer extends React.Component {
     this.refs.collapse.classList.toggle('invisible');
   }
 
-  render() {
+  // returns the card instance in case a card is clicked otherwise returns null
+  isCardClicked = (element) => {
+    while (element && !element.classList.contains("card")) {
+      element = element.parentElement;
+    }
+    return element;
+  }
 
+  handleClick = (event) => {
+    const card = this.isCardClicked(event.target);
+    if (!card) return;
+    this.props.onCardClick(card.id, this.props.type);
+  }
+
+  render() {
     return (
-      <div className="d-flex flex-column mt-2">
+      <div className="d-flex flex-column mt-2" onClick={this.handleClick}>
         <div className="d-flex flex-row">
           <b className="text-info p-2">{this.props.heading}</b>
           <Button
@@ -55,7 +68,7 @@ class RoomCardContainer extends React.Component {
 
 RoomCardContainer.propypes = {
   cards: PropTypes.arrayOf(PropTypes.shape({
-    title: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
     lastUpdated: PropTypes.instanceOf(Date).isRequired,
     type: PropTypes.oneOf(['me', 'others']).isRequired,
     owner: PropTypes.string.isRequired,
@@ -66,6 +79,7 @@ RoomCardContainer.propypes = {
     borderColor: PropTypes.string.isRequired
   })).isRequired,
 
+  type: PropTypes.oneOf(['me', 'others']).isRequired,
   heading: PropTypes.string.isRequired,
 
 };

@@ -97,11 +97,12 @@ router.get('/my/:status', auth, (req, res) => {
 
   Room.find({ owner: req.user.email, status: req.params.status })
     .then(rooms => {
-      const filteredData = rooms.filter(x => {
+      const filteredData = rooms.map(x => {
         return {
           name: x.name,
           description: x.description,
           usersPolled: x.polls.length,
+          pollItemCount: x.pollItem.keys.length,
           membersCount: x.xlist.length
         }
       });
@@ -126,12 +127,13 @@ router.get('/others/:status', auth, (req, res) => {
     status: req.params.status
   })
     .then(rooms => {
-      const filteredData = rooms.filter(x => {
+      const filteredData = rooms.map(x => {
         return {
           owner: x.owner,
           name: x.name,
           description: x.description,
           usersPolled: x.polls.length,
+          pollItemCount: x.pollItem.length,
           membersCount: x.xlist.length
         }
       });
@@ -170,6 +172,79 @@ router.delete('/remove/:name', auth, (req, res) => {
 });
 
 /*
+  @route    GET api/room/get/:type/:name/:email
+  @descrp   get a mentioned room
+  @access   private
+*/
+router.get('/get/:type/:name/:email', auth, (req, res) => {
+  // check the email in the request body
+  const emailRegex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
+  if (!emailRegex.test(req.params.email))
+    return res.status(400).json({ "email": "not a valid email" });
+
+  if (req.params.type !== 'me' && req.params.type !== 'others')
+    return res.status(400).json({ "reqeust": "Invalid request!" });
+
+  const roomPromise = (req.params.type === 'me') ?
+    Room.find({ owner: req.user.email, name: req.params.name }) :
+    Room.find({ owner: req.params.email, xlist: req.user.email, name: req.params.name });
+
+  roomPromise
+    .then(room => {
+      if (!room.length)
+        return res.status(400).json({ "room": "Room doesn't exists!" });
+
+      const filteredPolls = room[0].polls.map(x => {
+        return {
+          givenBy: x.givenBy,
+          lastUpdated: x.lastUpdated
+        };
+      });
+
+      return res.json({
+        owner: room[0].owner,
+        members: room[0].xlist,
+        name: room[0].name,
+        description: room[0].description,
+        pollItems: room[0].pollItem,
+        status: room[0].status,
+        usersPolled: filteredPolls,
+        result: room[0].result
+      });
+    })
+    .catch(err => {
+      res.status(500).send(err);
+    });
+});
+
+/*
+  @route    POST api/room/my/:name/toggle
+  @descrp   toggle the status of the specified room
+  @access   private
+*/
+router.post('/my/:name/toggle', auth, (req, res) => {
+  Room.findOne({ owner: req.user.email, name: req.params.name })
+    .then(room => {
+      console.log(room);
+      if (!room) {
+        res.status(400).json({ "room": "Room doesn't exists!" });
+        return null;
+      }
+
+      const changedStatus = (room.status === "active") ? "closed" : "active";
+      return Room.findByIdAndUpdate(room._id, { $set: { status: changedStatus } });
+    })
+    .then(result => {
+      // check if the result is already sent or not
+      if (!result) return;
+      return res.json({ "status": "successfully updated" });
+    })
+    .catch(err => {
+      res.status(500).send(err);
+    });
+});
+
+/*
   @route    POST api/room/:action/member/:room
   @descrp   add(or remove) the specified email to this access list in the room mentioned
   @access   private
@@ -180,7 +255,12 @@ router.post('/:action/member/:room', auth, (req, res) => {
 
   const emailRegex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
   if (!emailRegex.test(req.body.email))
-    return res.status(400).json({ "email": "not a valid email" });
+    return res.status(400).json({ "user": "not a valid email" });
+
+  // attempt to delete the owner itself
+  if (req.body.email === req.user.email && req.params.action === "remove") {
+    return res.status(400).json({ "user": "Couldn't delete the owner!" });
+  }
 
   const userPromise = User.find({ email: req.body.email });
   const roomPromise = Room.find({ owner: req.user.email, name: req.params.room });
@@ -203,7 +283,7 @@ router.post('/:action/member/:room', auth, (req, res) => {
 
       if (req.params.action === 'add') {
         if (room[0].xlist.includes(req.body.email)) {
-          res.status(400).json({ "email": "user already exist" });
+          res.status(400).json({ "user": "user already exist" });
           return null;
         }
         room[0].xlist.push(req.body.email);
@@ -211,7 +291,7 @@ router.post('/:action/member/:room', auth, (req, res) => {
       else {
         // If there exist a user to remove or not
         if (!room[0].xlist.includes(req.body.email)) {
-          res.status(400).json({ "email": "no user to delete" });
+          res.status(400).json({ "user": "no user to delete" });
           return null;
         }
 
