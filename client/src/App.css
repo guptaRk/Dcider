@@ -257,3 +257,9 @@ TODO : ADDING MEDIA QUERIES
 .div-hover--pointer:hover {
     cursor: pointer;
 }
+
+.text-overflow-control {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

@@ -1,25 +1,20 @@
-const mongoose = require('mongoose');
-const Joi = require('joi');
-
-function validateObject(mssg, regex) {
-  return {
-    validator: (name) => {
-      const reg = new RegExp(regex);
-      return reg.test(name);
-    },
-    message: mssg
-  };
-}
+import mongoose from 'mongoose';
+import validateEmail, {
+  name as validateName,
+  userid as validateUId,
+  keyValue as validateKeyValue
+} from '../validation/index';
 
 const roomSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
     trim: true,
-    validate: validateObject(
-      "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet",
-      "^([a-zA-Z])([a-zA-Z_0-9]){2,249}$"
-    )
+    validate: {
+      validator: validateName,
+      message:
+        "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet"
+    }
   },
 
   description: {
@@ -30,46 +25,53 @@ const roomSchema = new mongoose.Schema({
   owner: {
     type: String,
     required: true,
-    validate: validateObject(
-      "Email is not valid",
-      "^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$"
-    )
+    validate: {
+      validator: validateUId,
+      message: 'User-id is not valid'
+    }
   },
 
   pollItem: {
     type: {
       keys: {
-        type: [{
-          type: String,
-          required: true,
-          maxlength: 250,
-          trim: true,
-          validate: validateObject(
-            "key must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
-            /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
-          )
-        }]
+        type: [
+          {
+            type: String,
+            required: true,
+            maxlength: 250,
+            trim: true,
+            validate: {
+              validator: validateKeyValue,
+              message:
+                "key must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet"
+            }
+          }
+        ]
       },
 
       values: {
-        type: [{
-          type: String,
-          required: true,
-          maxlength: 250,
-          validate: validateObject(
-            "value must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
-            /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
-          ),
-          trim: true
-        }],
+        type: [
+          {
+            type: String,
+            required: true,
+            maxlength: 250,
+            validate: {
+              validator: validateKeyValue,
+              message:
+                "value must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet"
+            },
+
+            trim: true
+          }
+        ]
       }
     },
 
     validate: {
-      validator: function (x) {
-        return (x.keys.length === x.values.length);
+      validator: x => {
+        return x.keys.length === x.values.length;
       },
-      message: "Number of keys and values must be equal"
+      message: 'Number of keys and values must be equal'
     }
   },
 
@@ -80,46 +82,48 @@ const roomSchema = new mongoose.Schema({
   },
 
   xlist: {
-    type: [{
-      type: String,
-      required: true,
-      validate: validateObject(
-        "Email is not valid",
-        "^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$"
-      )
-    }]
+    type: [
+      {
+        type: String,
+        required: true,
+        validate: {
+          validator: validateEmail,
+          message: 'Email is not valid'
+        }
+      }
+    ]
   },
 
   polls: {
-    type: [{
+    type: [
+      {
+        givenBy: {
+          type: String,
+          required: true,
+          validate: {
+            validator: validateUId,
+            message: 'user-id is not valid'
+          }
+        },
 
-      givenBy: {
-        type: String,
-        required: true,
-        validate: validateObject(
-          "Email is not valid",
-          "^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$"
-        )
-      },
+        lastUpdated: {
+          type: Date,
+          required: true
+          // default: Date.now()
+        },
 
-      lastUpdated: {
-        type: Date,
-        required: true,
-        //default: Date.now()
-      },
-
-      ordering: {
-        type: [Number],
-        required: true,
-        validate: {
-          validator: function (arr) {
-            return (arr.length === this.pollItemCount);
-          },
-          message: "Not a valid ordering of pollItems"
+        ordering: {
+          type: [Number],
+          required: true,
+          validate: {
+            validator: arr => {
+              return arr.length === this.pollItemCount;
+            },
+            message: 'Not a valid ordering of pollItems'
+          }
         }
       }
-
-    }]
+    ]
   },
 
   // for the Gale Shapley algorithm
@@ -132,11 +136,11 @@ const roomSchema = new mongoose.Schema({
         const n = this.pollItem.keys.length;
         if (x.length !== n) return false;
 
-        for (let i = 0; i < n; i++)
+        for (let i = 0; i < n; i += 1)
           if (!Array.isArray(x[i]) || x[i].length !== n) return false;
         return true;
       },
-      message: "not a valid 2D array"
+      message: 'not a valid 2D array'
     }
   },
   cntValues: {
@@ -148,11 +152,11 @@ const roomSchema = new mongoose.Schema({
         const n = this.pollItem.keys.length;
         if (x.length !== n) return false;
 
-        for (let i = 0; i < n; i++)
+        for (let i = 0; i < n; i += 1)
           if (!Array.isArray(x[i]) || x[i].length !== n) return false;
         return true;
       },
-      message: "not a valid 2D array"
+      message: 'not a valid 2D array'
     }
   },
 
@@ -161,4 +165,4 @@ const roomSchema = new mongoose.Schema({
   }
 });
 
-module.exports.Room = mongoose.model('room', roomSchema);
+export default mongoose.model('room', roomSchema);

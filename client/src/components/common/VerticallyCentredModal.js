@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
-// Whatever you want to display inside the Modal
+// Whatever you want to display inside the Modal just nest it inside!
 class VerticallyCentredModal extends React.Component {
   render() {
     return (
@@ -12,7 +12,7 @@ class VerticallyCentredModal extends React.Component {
         size="lg"
         centered>
         <Modal.Header closeButton>
-          {this.props.heading}
+          <b>{this.props.heading}</b>
         </Modal.Header>
         <Modal.Body>
           {this.props.children}

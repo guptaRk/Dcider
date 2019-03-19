@@ -1,38 +1,38 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import validateEmail, {
+  name as validateName,
+  userid as validateUId
+} from '../validation/index';
 
 const xlistSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
     validate: {
-      validator: function (name) {
-        const regex = /^([a-zA-Z])([a-zA-Z_0-9]){0,255}$/;
-        return regex.test(name);
-      },
+      validator: validateName,
       message:
-        "Xlist name must start with alphabet and contain only alpha-numeric characters and underscore(_)"
+        'Xlist name must start with alphabet and contain only alpha-numeric characters and underscore(_)'
     }
   },
   // array of emails (emails of may contains unregistered users)
   // This scenario is handled at the run time i.e. at the
   // creation of a room using this XList
   members: {
-    type: [{
-      type: String,
-      validate: {
-        validator: function (email) {
-          const regex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
-          return regex.test(email);
-        },
-        message: "Not a valid email"
+    type: [
+      {
+        type: String,
+        validate: {
+          validator: validateEmail,
+          message: 'Not a valid email'
+        }
       }
-    }],
+    ],
 
     validate: {
-      validator: function (members) {
-        return (members && members.length > 0);
+      validator: members => {
+        return members && members.length > 0;
       },
-      message: "Empty XList cannot be created"
+      message: 'Empty XList cannot be created'
     },
     required: true
   },
@@ -42,11 +42,8 @@ const xlistSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: function (email) {
-        const regex = /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/;
-        return regex.test(email);
-      },
-      message: "Email is not valid"
+      validator: validateUId,
+      message: 'User-id is not valid'
     }
   },
 
@@ -54,9 +51,7 @@ const xlistSchema = new mongoose.Schema({
     type: Date,
     required: true,
     default: Date.now()
-  },
+  }
 });
 
-const XList = mongoose.model('xlist', xlistSchema);
-
-module.exports.XList = XList;
+export default mongoose.model('xlist', xlistSchema); 

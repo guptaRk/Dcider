@@ -1,91 +1,143 @@
-const express = require('express');
-const router = express.Router();
-const { User } = require('../models/User');
-const validateLogin = require('../validation/login');
-const validateRegister = require('../validation/register');
+import express from 'express';
+import bcrypt from 'bcrypt';
 
-const bcrypt = require('bcrypt');
+import User from '../models/User';
+import validateEmail, {
+  password as validatePassword,
+  userid as validateUId,
+  userName as validateUserName
+} from '../validation/index';
+
+const router = express.Router();
 const saltRounds = 10;
 
 /*
-  @route    POST api/users/register
-  @descrp   register a user and send the jwt
-  @access   public
+  @route      POST api/users/register
+  @descrp     register a user and send the jwt
+  @access     public
+  @bodyparm   user's email(email), user's password(password),
+              user's userid(uid), user's name(name)
 */
 router.post('/register', async (req, res) => {
-  let { error } = validateRegister(req.body);
-  if (error) return res.status(400).json(error);
+  // verify the body parameters
+  if (!req.body.email || !validateEmail(req.body.email))
+    return res.status(400).json({ email: 'provide a valid email' });
 
-  //Initialize error object
-  error = {};
-
-  try {
-    const result = await User.findOne({ email: req.body.email });
-    if (result && result.length !== 0) {
-      error["email"] = "Email already registered";
-      return res.status(400).json(error);
-    }
-
-    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-
-    const user = new User({
-      name: req.body.name,
-      password: hashedPassword,
-      email: req.body.email
+  if (!req.body.password || !validatePassword(req.body.password))
+    return res.status(400).json({
+      password:
+        'password of minimum 5 characters is required and can contains upto 40 characters only'
     });
 
-    user.save()
-      .then(result => {
-        console.log(result);
-        res.setHeader("x-auth-token", user.getToken());
-        res.send(result);
-      })
-      .catch(err => {
-        res.status(500).send("save : " + err);
-      });
+  if (!req.body.uid || !validateUId(req.body.uid))
+    return res.status(400).json({
+      uid:
+        "this is required and can contains only alphanumeric characters and may contains underscore'_'"
+    });
 
-  } catch (err) {
-    // Internal server error
-    res.status(500).send(err);
-  }
-})
+  if (!req.body.name || !validateUserName(req.body.name))
+    return res.status(400).json({ name: 'name is required' });
 
-/*
-  @route    POST api/users/login
-  @descrp   login a user and send the jwt
-  @access   public
-*/
-router.post('/login', async (req, res) => {
-  let { error } = validateLogin(req.body);
-  if (error) return res.status(400).send(error);
+  const userPromise = User.find({
+    $or: [{ email: req.body.email }, { uid: req.body.uid }]
+  });
+  const passwordHashPromise = userPromise.then(users => {
+    if (users.length > 0) {
+      if (
+        users[0].email === req.body.email ||
+        (users.length > 1 && users[1].email === req.body.email)
+      ) {
+        res
+          .status(400)
+          .json({ email: 'email already registered. Please login!' });
+        return null;
+      }
 
-  error = {};
-  try {
-    const user = await User.find({ email: req.body.email });
-    if (user.length === 0) {
-      error['email'] = 'Email not registered!';
-      return res.status(400).json(error);
+      if (users[0].uid === req.body.uid) {
+        res
+          .status(400)
+          .json({ uid: 'choose a different handle. This is already in use' });
+        return null;
+      }
     }
+    return bcrypt.hash(req.body.password, saltRounds);
+  });
 
-    bcrypt.compare(req.body.password, user[0].password)
-      .then((result) => {
-        if (result === false) {
-          error['password'] = 'Incorrect password';
-          return res.status(400).json(error);
-        }
+  let newUser;
 
-        res.setHeader('x-auth-token', user[0].getToken());
-        res.json({
-          name: user[0].name,
-          email: user[0].email
-        });
+  // to get the result of both the promises at one place
+  Promise.all([userPromise, passwordHashPromise])
+    .then(([users, hashedPassword]) => {
+      // check if the response is already sent or not
+      if (!hashedPassword) return null;
+
+      newUser = new User({
+        name: req.body.name,
+        password: hashedPassword,
+        email: req.body.email,
+        uid: req.body.uid
       });
-  }
-  catch (err) {
-    // Internal server error
-    res.status(500).send(err);
-  }
+      return newUser.save();
+    })
+    .then(result => {
+      // check if the response is already sent or not
+      if (!result) return;
 
+      res.setHeader('x-auth-token', newUser.getToken());
+      res.send(result);
+    })
+    .catch(err => {
+      // Internal server error
+      res.status(500).send(err);
+    });
+  return 0;
 });
 
-module.exports = router;
+/*
+  @route      POST api/users/login
+  @descrp     login a user and send the jwt
+  @access     public
+  @bodyparm   user's email(email), user's password(password)
+*/
+router.post('/login', async (req, res) => {
+  // validate the request body details
+  if (!req.body.email || !validateEmail(req.body.email))
+    return res.status(400).json({ email: 'Not a valid email' });
+  if (!req.body.password || !validatePassword(req.body.password))
+    return res.status(400).json({ password: 'Incorrect password' });
+
+  const userPromise = User.findOne({ email: req.body.email });
+  const checkPasswordPromise = userPromise.then(user => {
+    if (!user) {
+      res.status(400).json({ email: 'Email not registered!' });
+      return null;
+    }
+    return bcrypt.compare(req.body.password, user.password);
+  });
+
+  Promise.all([userPromise, checkPasswordPromise])
+    .then(([user, result]) => {
+      // check if the response is already sent or not
+      if (result === null) return;
+
+      if (result === false) {
+        res.status(400).json({
+          password: 'Incorrect password'
+        });
+        return;
+      }
+
+      res.setHeader('x-auth-token', user.getToken());
+      res.json({
+        name: user.name,
+        email: user.email
+      });
+    })
+    .catch(err => {
+      // Internal server error
+      res.status(500).send(err);
+    });
+  return 0;
+});
+
+export default router;

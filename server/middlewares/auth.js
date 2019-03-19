@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = function (req, res, next) {
+export default (req, res, next) => {
   const authToken = req.get('x-auth-token');
   if (!authToken)
     return res.status(400).json({ "token": "Token not found" });

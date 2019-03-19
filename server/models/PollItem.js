@@ -1,59 +1,61 @@
-const mongoose = require('mongoose');
-
-function validateObject(mssg, regex) {
-  return {
-    validator: (name) => {
-      const reg = new RegExp(regex);
-      return reg.test(name);
-    },
-    message: mssg
-  };
-}
+import mongoose from 'mongoose';
+import {
+  name as validateName,
+  keyValue as validateKeyValue,
+  userid as validateUId
+} from '../validation/index';
 
 const pollItemSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    validate: validateObject(
-      "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet",
-      "^([a-zA-Z])([a-zA-Z_0-9]){2,249}$"
-    )
+    validate: {
+      validator: validateName,
+      message:
+        "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet"
+    }
   },
 
   keys: {
-    type: [{
-      type: String,
-      required: true,
-      maxlength: 250,
-      trim: true,
-      validate: validateObject(
-        "key must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
-        /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
-      )
-    }]
+    type: [
+      {
+        type: String,
+        required: true,
+        maxlength: 250,
+        trim: true,
+        validate: {
+          validator: validateKeyValue,
+          message:
+            "key must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet"
+        }
+      }
+    ]
   },
 
   values: {
-    type: [{
-      type: String,
-      required: true,
-      maxlength: 250,
-      validate: validateObject(
-        "value must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet",
-        /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/
-      ),
-      trim: true
-    }],
+    type: [
+      {
+        type: String,
+        required: true,
+        maxlength: 250,
+        validate: {
+          validator: validateKeyValue,
+          message:
+            "value must be alpha numeric(may contains whitespaces or '_' in between) and must start with an alphabet"
+        },
+        trim: true
+      }
+    ]
   },
 
   owner: {
     type: String,
     trim: true,
     required: true,
-    validate: validateObject(
-      "Email is not valid",
-      /^([a-zA-Z_0-9]){1,150}@([a-z]){1,50}\.[a-z]{2,10}$/
-    )
+    validate: {
+      validator: validateUId,
+      message: 'User-id is not valid'
+    }
   },
 
   lastUpdated: {
@@ -62,4 +64,4 @@ const pollItemSchema = new mongoose.Schema({
   }
 });
 
-module.exports.PollItem = mongoose.model('pollItem', pollItemSchema);
+export default mongoose.model('pollItem', pollItemSchema);

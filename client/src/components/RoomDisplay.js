@@ -1,6 +1,6 @@
 import React from 'react';
 import server from '../Axios';
-import { InputGroup, Form, Button, Table, ListGroup } from 'react-bootstrap';
+import { InputGroup, Form, Button, Table, ListGroup, DropdownButton, Dropdown, FormControl } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { logout } from '../actions/auth';
 import VerticallyCentredModal from './common/VerticallyCentredModal';
@@ -49,6 +49,9 @@ class RoomDisplay extends React.Component {
     //adding a member
     userError: null,
     addUserClicked: false,
+
+    //adding a poll
+    contributeClicked: false
   };
 
   componentWillUnmount() {
@@ -170,6 +173,66 @@ class RoomDisplay extends React.Component {
       });
   }
 
+  onPollSubmit = () => {
+    const n = this.state.pollItems.keys.length;
+
+    // make a mapping which is helpful for assigning indexes to the keys and values
+    let keyMapping = {}, valueMapping = {};
+    for (let i = 0; i < n; i++) {
+      keyMapping[this.state.pollItems.keys[i]] = i;
+      valueMapping[this.state.pollItems.values[i]] = i;
+    }
+
+    let key = [], value = [];
+    for (let i = 0; i < n; i++) {
+      key.push(keyMapping[this.refs[`keyChoice${i}`].value]);
+      value.push(valueMapping[this.refs[`valueChoice${i}`].value]);
+    }
+
+    // Check whether the given choice is a valid one or not?
+    let copy = key.slice();
+    copy.sort();
+    for (let i = 0; i < n; i++)
+      if (copy[i] !== i) {
+        // TODO: Error
+        console.log('key error!');
+        break;
+      }
+
+    copy = value.slice();
+    copy.sort();
+    for (let i = 0; i < n; i++)
+      if (copy[i] !== i) {
+        // TODO: Error
+        console.log('value error!');
+        break;
+      }
+
+    let finalMapping = new Array(n);
+    for (let i = 0; i < n; i++)
+      finalMapping[key[i]] = value[i];
+
+    server.post(`/room/${this.state.name}/poll`, {
+      owner: this.state.owner,
+      order: finalMapping
+    })
+      .then(res => {
+        if (this.isUnmount) return;
+        console.log(res);
+      })
+      .catch(err => {
+        if (this.isUnmount) return;
+        if (err.response && err.response.status === 400) {
+          // either token expires or user modifies it
+          if (err.response.data.token) {
+            this.props.logout();
+            return;
+          }
+        }
+      });
+
+  }
+
   render() {
     const { keys, values } = this.state.pollItems;
     let keyValuePairs = [];
@@ -177,7 +240,7 @@ class RoomDisplay extends React.Component {
       keyValuePairs.push({ key: keys[i], value: values[i] });
 
     return (
-      <div>
+      <div className="d-flex flex-column h-100">
         <InputGroup className="mt-3">
           <Form.Control
             placeholder="Room name"
@@ -205,7 +268,8 @@ class RoomDisplay extends React.Component {
           <Button
             variant={this.state.status === "active" ? "outline-danger" : "outline-success"}
             className="ml-auto mb-2"
-            onClick={this.toggleStatus}>
+            onClick={this.toggleStatus}
+            disabled={this.state.owner !== this.props.auth.email}>
             {this.state.status === "active" ? "close it" : "open it"}
           </Button>
         </div>
@@ -251,8 +315,8 @@ class RoomDisplay extends React.Component {
                 <ListGroup.Item
                   key={ind}
                   variant="secondary">
-                  <div className="d-flex flex-row flex-wrap">
-                    <b>{cur.givenBy}</b>
+                  <div className="d-flex flex-row flex-wrap text-overflow-control">
+                    <b className="text-overflow-control">{cur.givenBy}</b>
                     <i className="ml-auto">
                       {this.getTimeDifference(new Date(cur.lastUpdated))}
                     </i>
@@ -264,7 +328,11 @@ class RoomDisplay extends React.Component {
 
           <VerticallyCentredModal
             show={this.state.membersListShow}
-            onHide={() => this.setState({ membersListShow: false, addUserClicked: false })}
+            onHide={() => this.setState({
+              membersListShow: false,
+              addUserClicked: false,
+              userError: null
+            })}
             heading="Room members">
             {/* Instead of attaching a number of onClick we add only one and here */}
             <ListGroup
@@ -275,7 +343,7 @@ class RoomDisplay extends React.Component {
                     key={`ListGroupItemShowingMembers${ind}`}
                     className="d-flex flex-row"
                     variant="info">
-                    <i>{cur}</i>
+                    <i className="text-overflow-control">{cur}</i>
                     {this.state.owner === this.props.auth.email &&
                       <b
                         className={`ml-auto deleteMember`}
@@ -332,7 +400,94 @@ class RoomDisplay extends React.Component {
           </VerticallyCentredModal>
         </div>
 
-      </div>
+        {/* For adding a poll in the current room */}
+        <div className="mt-auto ml-auto mr-auto">
+          <Button
+            variant="outline-primary"
+            onClick={() => this.setState({ contributeClicked: true })}>
+            Want to contribute?
+          </Button>
+
+          <VerticallyCentredModal
+            heading={`Polling in the room '${this.state.name}'`}
+            onHide={() => this.setState({ contributeClicked: false })}
+            show={this.state.contributeClicked}>
+
+            <div className="d-flex flex-column">
+              <Table bordered striped>
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th>Values</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {/* create an array of values [0, 1, 2 .....] */}
+                  {new Array(this.state.pollItems.keys.length).fill(0).map((x, cur) => cur).map(x => (
+                    <tr key={`row${x}`}>
+                      <td>
+                        <InputGroup>
+                          <FormControl
+                            placeholder="key choice"
+                            aria-label="key-choice"
+                            ref={`keyChoice${x}`}
+                          />
+                          <DropdownButton
+                            as={InputGroup.Append}
+                            variant="outline-secondary"
+                            title="select"
+                          >
+                            {this.state.pollItems.keys.map(cur => (
+                              <Dropdown.Item
+                                key={cur}
+                                eventKey={cur}
+                                onSelect={eventKey => this.refs[`keyChoice${x}`].value = eventKey}>
+                                {cur}
+                              </Dropdown.Item>
+                            ))}
+                          </DropdownButton>
+                        </InputGroup>
+                      </td>
+                      <td>
+                        <InputGroup>
+                          <FormControl
+                            placeholder="value choice"
+                            aria-label="value-choice"
+                            ref={`valueChoice${x}`}
+                          />
+                          <DropdownButton
+                            alignRight
+                            as={InputGroup.Append}
+                            variant="outline-secondary"
+                            title="select"
+                          >
+                            {this.state.pollItems.values.map(cur => (
+                              <Dropdown.Item
+                                key={cur}
+                                eventKey={cur}
+                                onSelect={eventKey => this.refs[`valueChoice${x}`].value = eventKey}>
+                                {cur}
+                              </Dropdown.Item>
+                            ))}
+                          </DropdownButton>
+                        </InputGroup>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+
+              </Table>
+              <Button
+                variant="outline-success"
+                className="ml-auto mr-auto"
+                onClick={this.onPollSubmit}>
+                Submit
+              </Button>
+            </div>
+          </VerticallyCentredModal>
+        </div>
+      </div >
     );
   }
 }
