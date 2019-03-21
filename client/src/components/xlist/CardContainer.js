@@ -1,11 +1,13 @@
 import React from 'react';
-import { Tabs, Tab, CardColumns } from 'react-bootstrap';
+import { Tabs, Tab, CardColumns, Button, Form } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { FaPlus } from 'react-icons/fa';
 
-import { logout } from '../actions/auth';
-import server from '../Axios';
-import XlistCard from './XlistCard';
+import { logout } from '../../actions/auth';
+import VerticallyCenteredModal from '../common/VerticallyCentredModal';
+import server from '../../Axios';
+import XlistCard from './Card';
 
 class XlistCardContainer extends React.Component {
   isUnmount = false;
@@ -16,7 +18,10 @@ class XlistCardContainer extends React.Component {
 
     clickedCardName: null,
     clickedCardType: null,
-    clickedCardOwner: null
+    clickedCardOwner: null,
+
+    // for the error during x-List creation
+    addXlistError: null
   };
 
   componentDidMount() {
@@ -24,10 +29,7 @@ class XlistCardContainer extends React.Component {
       .get('/xlist/me')
       .then(response => {
         if (this.isUnmount) return;
-        this.setState({
-          myXlists: response.data,
-          clickedCardType: 'me'
-        });
+        this.setState({ myXlists: response.data, clickedCardType: 'me' });
       })
       .catch(err => {
         if (this.isUnmount) return;
@@ -55,10 +57,11 @@ class XlistCardContainer extends React.Component {
       .get('/xlist/me')
       .then(response => {
         if (this.isUnmount) return;
-        this.setState({ myXlists: response.data });
+        this.setState({ myXlists: response.data, clickedCardType: 'me' });
       })
       .catch(err => {
         if (this.isUnmount) return;
+        // TODO: logout the user if token mismatches
         console.log('refreshing my xlists: ', err.response);
       });
   };
@@ -68,7 +71,10 @@ class XlistCardContainer extends React.Component {
       .get('/xlist/others')
       .then(response => {
         if (this.isUnmount) return;
-        this.setState({ otherXlists: response.data });
+        this.setState({
+          otherXlists: response.data,
+          clickedCardType: 'others'
+        });
       })
       .catch(err => {
         if (this.isUnmount) return;
@@ -129,62 +135,108 @@ class XlistCardContainer extends React.Component {
   };
 
   onTabSelect = eventKey => {
-    if (eventKey === 'MyXlists') {
-      this.refreshMyXlists();
-      this.setState({ clickedCardType: 'me' });
-    } else {
-      this.refreshOtherXlists();
-      this.setState({ clickedCardType: 'others' });
-    }
+    if (eventKey === 'MyXlists') this.refreshMyXlists();
+    else this.refreshOtherXlists();
   };
 
-  convertArrayToString = arr => {
-    let str = '';
-    for (let j = 0; j < arr.length; j += 1) {
-      const i = arr[j];
-      str += `${i}\n`;
-    }
-    return str;
+  onXlistAdd = () => {
+    const name = this.refs.xlistName.value;
+    server
+      .post('/xlist/create', { members: [], name })
+      .then(() => {
+        if (this.isUnmount) return;
+        this.setState({ clickedCardName: name });
+      })
+      .catch(err => {
+        if (this.isUnmount) return;
+        if (err.response) {
+          const res = err.response;
+          if (res.status === 400 && res.data.name) {
+            this.setState({ addXlistError: res.data.name });
+            return;
+          }
+          if (res.status === 500) this.setState({ addXlistError: res.data });
+        }
+      });
   };
 
   render() {
     if (this.state.clickedCardName) {
+      if (this.state.clickedCardType === 'me')
+        return (
+          <Redirect
+            to={{
+              pathname: `/xlist/me/${this.state.clickedCardName}`
+            }}
+            push={true}
+          />
+        );
       return (
         <Redirect
           to={{
-            pathname: `/xlist/${this.state.clickedCardType}/${
+            pathname: `/xlist/${this.state.clickedCardOwner}/${
               this.state.clickedCardName
-              }`,
-            state: {
-              owner: this.state.clickedCardOwner,
-              type: this.state.clickedCardType,
-              name: this.state.clickedCardName
-            }
+              }`
           }}
           push={true}
         />
       );
     }
-    console.log('auth : ', this.props.auth);
+
     return (
       <Tabs defaultActiveKey="MyXlists" onSelect={this.onTabSelect}>
         <Tab
           eventKey="MyXlists"
-          title="My XLists"
+          title="My X-Lists"
           onClick={this.refreshMyXlists}
         >
-          <CardColumns style={{ marginTop: '20px' }} onClick={this.onClick}>
-            {this.state.myXlists.map(x => (
-              <XlistCard
-                key={x.name}
-                title={x.name}
-                type="me"
-                owner={this.props.auth.email}
-                lastUpdated={new Date(x.lastUpdated)}
-                members={x.members}
-              />
-            ))}
-          </CardColumns>
+          <div>
+            <CardColumns style={{ marginTop: '20px' }} onClick={this.onClick}>
+              {this.state.myXlists.map(x => (
+                <XlistCard
+                  key={x.name}
+                  title={x.name}
+                  type="me"
+                  owner={this.props.auth.uid}
+                  lastUpdated={new Date(x.lastUpdated)}
+                  members={x.members}
+                />
+              ))}
+            </CardColumns>
+            <Button
+              className="xlist-add"
+              variant="primary"
+              onClick={() => this.setState({ addXlistClicked: true })}
+            >
+              <FaPlus style={{ margin: 'auto' }} />
+            </Button>
+
+            <VerticallyCenteredModal
+              heading="Add a new X-List"
+              show={this.state.addXlistClicked}
+              onHide={() => this.setState({ addXlistClicked: false })}
+            >
+              <div className="d-flex flex-column bg-light">
+                <Form.Control
+                  type="text"
+                  placeholder="X-List name"
+                  isInvalid={this.state.addXlistError !== null}
+                  ref="xlistName"
+                />
+                <Form.Control.Feedback type="invalid">
+                  {this.state.addXlistError}
+                </Form.Control.Feedback>
+
+                <Button
+                  variant="outline-success"
+                  className="mt-2 ml-auto"
+                  onClick={this.onXlistAdd}
+                >
+                  Create
+                </Button>
+              </div>
+            </VerticallyCenteredModal>
+          </div>
         </Tab>
         <Tab eventKey="others" title="Others" onClick={this.refreshOtherXlists}>
           <CardColumns style={{ marginTop: '20px' }} onClick={this.onClick}>

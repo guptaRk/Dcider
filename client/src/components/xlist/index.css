@@ -1,0 +1,22 @@
+.xlist-add {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  cursor: pointer;
+  align-items: center;
+  display: flex;
+  box-shadow: 6px 6px 15px 0 gray;
+}
+
+.xlist-add:hover {
+  box-shadow: 4px 4px 12px 0 grey;
+}
+
+.text-overflow-control {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

@@ -104,7 +104,8 @@ router.post('/create', auth, (req, res) => {
         xlist: xlist.members,
         cntKeys: getEmpty2DArray(len, len),
         cntValues: getEmpty2DArray(len, len),
-        result: get1DArray(len)
+        result: get1DArray(len),
+        lastUpdated: Date.now()
       });
 
       return room.save();
@@ -137,7 +138,8 @@ router.get('/my/all/:status', auth, (req, res) => {
           description: x.description,
           usersPolled: x.polls.length,
           pollItemCount: x.pollItem.keys.length,
-          membersCount: x.xlist.length
+          membersCount: x.xlist.length,
+          lastUpdated: x.lastUpdated
         };
       });
       return res.json(filteredData);
@@ -167,8 +169,9 @@ router.get('/others/all/:status', auth, (req, res) => {
           name: x.name,
           description: x.description,
           usersPolled: x.polls.length,
-          pollItemCount: x.pollItem.length,
-          membersCount: x.xlist.length
+          pollItemCount: x.pollItem.keys.length,
+          membersCount: x.xlist.length,
+          lastUpdated: x.lastUpdated
         };
       });
       return res.json(filteredData);
@@ -246,7 +249,8 @@ router.get('/:type/:name/', auth, (req, res) => {
         pollItems: room[0].pollItem,
         status: room[0].status,
         usersPolled: filteredPolls,
-        result: room[0].result
+        result: room[0].result,
+        lastUpdated: room[0].lastUpdated
       });
     })
     .catch(err => {
@@ -269,7 +273,7 @@ router.post('/my/:name/toggle', auth, (req, res) => {
 
       const changedStatus = room.status === 'active' ? 'closed' : 'active';
       return Room.findByIdAndUpdate(room._id, {
-        $set: { status: changedStatus }
+        $set: { status: changedStatus, lastUpdated: Date.now() }
       });
     })
     .then(result => {
@@ -335,6 +339,8 @@ router.post('/:action/member/:room', auth, (req, res) => {
 
         room[0].xlist = room[0].xlist.filter(x => x !== req.body.email);
       }
+
+      room[0].lastUpdated = Date.now();
       return Room.findByIdAndUpdate(
         room[0]._id,
         { $set: room[0] },
@@ -415,6 +421,7 @@ router.post('/:action/pollitem/:room', auth, (req, res) => {
       room[0].cntValues = getEmpty2DArray(n, n);
       room[0].result = get1DArray(n);
 
+      room[0].lastUpdated = Date.now();
       // save the updated room
       return Room.findByIdAndUpdate(
         room[0]._id,
@@ -507,6 +514,7 @@ router.post('/:room/poll', auth, (req, res) => {
         room[0].cntValues[seq[i]][i] += 1;
       }
 
+      room[0].lastUpdated = Date.now();
       // Insert the current poll
       room[0].polls.push(poll);
       return Room.findByIdAndUpdate(

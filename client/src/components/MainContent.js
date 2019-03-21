@@ -9,10 +9,8 @@ import Login from './Login';
 import Register from './Register';
 import { Switch, Route } from 'react-router';
 import PrivateRoute from './common/PrivateRoute';
-import XlistCardContainer from './XlistCardContainer';
-import XlistDisplay from './XlistDisplay';
-import RoomsContainer from './RoomsContainer';
-import RoomDisplay from './RoomDisplay';
+import XList from './xlist/index';
+import Room from './room';
 
 class MainContent extends React.Component {
   render() {
@@ -42,10 +40,8 @@ class MainContent extends React.Component {
         <Switch>
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
-          <PrivateRoute exact path="/xlist" component={XlistCardContainer} />
-          <PrivateRoute exact path="/xlist/:type/:name" component={XlistDisplay} />
-          <PrivateRoute exact path="/room" component={RoomsContainer} />
-          <PrivateRoute exact path="/room/:type/:name" component={RoomDisplay} />
+          <PrivateRoute path="/xlist" component={XList} />
+          <PrivateRoute path="/room" component={Room} />
           <Route component={NoMatch} />
         </Switch>
       </div>

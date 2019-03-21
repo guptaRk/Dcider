@@ -106,16 +106,16 @@ router.post('/others/clone/:room', auth, (req, res) => {
 
   // check whether format of the room provided in the params is correct or not
   if (!validateName(req.params.room))
-    return res.status(400).json({ room: 'Invalid room name' });
+    return res.status(400).json({ name: 'Invalid room name' });
 
   const xlistPromise = XList.find({
     owner: req.user.uid,
     name: req.params.name
   });
   const validMemberOfTheRoomPromise = Room.find({
-    uid: req.body.owner,
+    owner: req.body.owner,
     name: req.params.room,
-    xlist: req.user.uid
+    xlist: req.user.email
   });
 
   Promise.all([validMemberOfTheRoomPromise, xlistPromise])
@@ -131,7 +131,7 @@ router.post('/others/clone/:room', auth, (req, res) => {
       if (!room.length)
         return res
           .status(400)
-          .json({ room: `not a valid room under user '${req.body.owner}'` });
+          .json({ name: `not a valid room under user '${req.body.owner}'` });
 
       // build the request body to make it suitable
       // to forward the request to '/create'
@@ -178,7 +178,8 @@ router.get('/me', auth, (req, res) => {
 
 /*
   @route    GET /api/xlist/others
-  @descrp   get all the Xlist created due to rooms
+  @descrp   get all the Xlist created by others and 
+            I am a member of that and that xlist is used in any room
   @access   protected
 */
 router.get('/others', auth, (req, res) => {
@@ -236,11 +237,11 @@ router.get('/me/:name', auth, (req, res) => {
 });
 
 /*
-  @route    GET /api/xlist/others/:owner/:room
-  @descrp   get the Xlist specified XList
+  @route    GET /api/xlist/:owner/:room
+  @descrp   get the Xlist of the specified Room of specified owner
   @access   protected
 */
-router.get('/others/:owner/:room', auth, (req, res) => {
+router.get('/:owner/:room', auth, (req, res) => {
   // check whether the pattern of the name is correct or not (avoid querying db)
   if (!validateName(req.params.room))
     return res.status(400).json({ name: 'Invalid room name' });

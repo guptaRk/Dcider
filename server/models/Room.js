@@ -160,6 +160,12 @@ const roomSchema = new mongoose.Schema({
     }
   },
 
+  lastUpdated: {
+    type: Date,
+    required: true,
+    default: Date.now()
+  },
+
   result: {
     type: [Number]
   }

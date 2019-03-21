@@ -1,40 +1,33 @@
 import React from 'react';
-import server from '../Axios';
-import { InputGroup, Form, Button, Table, ListGroup, DropdownButton, Dropdown, FormControl } from 'react-bootstrap';
+import server from '../../Axios';
+import {
+  InputGroup,
+  Form,
+  Button,
+  Table,
+  ListGroup,
+  DropdownButton,
+  Dropdown,
+  FormControl
+} from 'react-bootstrap';
 import { connect } from 'react-redux';
-import { logout } from '../actions/auth';
-import VerticallyCentredModal from './common/VerticallyCentredModal';
+import { logout } from '../../actions/auth';
+import VerticallyCentredModal from '../common/VerticallyCentredModal';
 
 class RoomDisplay extends React.Component {
   isUnmount = false;
 
-  getTimeDifference = (lastUpdatedDate) => {
-    let diff = (Date.now() - lastUpdatedDate) / 1000;
-    if (diff < 60) return (diff.toFixed(0) + " sec ago");
-    diff /= 60;
-    if (diff < 60) return (diff.toFixed(0) + " min ago");
-    diff /= 60;
-    if (diff < 24) return (diff.toFixed(0) + " hr ago");
-    diff /= 24;
-    if (diff < 24) return (diff.toFixed(0) + " days ago");
-    diff /= 30;
-    if (diff < 30) return (diff.toFixed(0) + " months ago");
-    diff /= 12;
-    if (diff < 12) return (diff.toFixed(0) + " years ago");
-    return ("more than 12 year ago");
-  }
-
   state = {
     // the things returned from the server directly
-    owner: "",
+    owner: '',
     members: [],
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     pollItems: {
       keys: [],
       values: []
     },
-    status: "closed",
+    status: 'closed',
     usersPolled: [],
     result: [],
 
@@ -54,22 +47,10 @@ class RoomDisplay extends React.Component {
     contributeClicked: false
   };
 
-  componentWillUnmount() {
-    this.isUnmount = true;
-  }
-
-  // for getting an appropraite mapping from the result array
-  mapTheResult = () => {
-    const values = this.state.pollItems.values.slice();
-    // considering that the keys are intact and the result array gives the position in the value array that match with the given index's key
-
-    for (let i = 0; i < this.state.pollItems.values.length; i++)
-      this.state.pollItems.values[i] = values[this.state.result[i]];
-  }
-
   componentDidMount() {
-    const { type, name, owner } = this.props.location.state;
-    server.get(`/room/get/${type}/${name}/${owner}`)
+    const { type, name } = this.props.match.params;
+    server
+      .get(`/room/${type}/${name}`)
       .then(result => {
         if (this.isUnmount) return;
         this.setState({ ...result.data });
@@ -85,12 +66,27 @@ class RoomDisplay extends React.Component {
       });
   }
 
-  onNameChange = (evt) => {
+  componentWillUnmount() {
+    this.isUnmount = true;
+  }
+
+  // for getting an appropraite mapping from the result array
+  mapTheResult = () => {
+    const values = this.state.pollItems.values.slice();
+    // considering that the keys are intact and
+    // the result array gives the position in the value array
+    // that match with the given index's key
+
+    for (let i = 0; i < this.state.pollItems.values.length; i++)
+      this.state.pollItems.values[i] = values[this.state.result[i]];
+  };
+
+  onNameChange = evt => {
     this.setState({
       name: evt.target.value,
       nameChanged: true
     });
-  }
+  };
 
   nameChange = () => {
     const currentName = this.state.name;
@@ -99,15 +95,16 @@ class RoomDisplay extends React.Component {
     if (this.state.isNameValid) {
       // send the updated name to the server
     }
-  }
+  };
 
   toggleStatus = () => {
-    server.post(`/room/my/${this.state.name}/toggle`)
+    server
+      .post(`/room/my/${this.state.name}/toggle`)
       .then(result => {
         if (this.isUnmount) return;
         this.setState(prvState => {
           return {
-            status: prvState.status === "active" ? "closed" : "active"
+            status: prvState.status === 'active' ? 'closed' : 'active'
           };
         });
       })
@@ -119,18 +116,19 @@ class RoomDisplay extends React.Component {
           return;
         }
       });
-  }
+  };
 
-  deleteMember = (evt) => {
+  deleteMember = evt => {
     const element = evt.target;
-    if (!element.classList.contains("deleteMember")) return;
-    server.post(`/room/remove/member/${this.state.name}`, { "email": element.id })
+    if (!element.classList.contains('deleteMember')) return;
+    server
+      .post(`/room/remove/member/${this.state.name}`, { email: element.id })
       .then(result => {
         if (this.isUnmount) return;
         this.setState(prvState => {
           return {
             members: prvState.members.filter(x => x !== element.id)
-          }
+          };
         });
       })
       .catch(err => {
@@ -142,13 +140,13 @@ class RoomDisplay extends React.Component {
             return;
           }
         }
-
       });
-  }
+  };
 
   addMember = () => {
     const email = this.refs.addUserField.value;
-    server.post(`/room/add/member/${this.state.name}`, { email })
+    server
+      .post(`/room/add/member/${this.state.name}`, { email })
       .then(result => {
         if (this.isUnmount) return;
         this.setState(prvState => {
@@ -169,22 +167,23 @@ class RoomDisplay extends React.Component {
             return;
           }
         }
-
       });
-  }
+  };
 
   onPollSubmit = () => {
     const n = this.state.pollItems.keys.length;
 
     // make a mapping which is helpful for assigning indexes to the keys and values
-    let keyMapping = {}, valueMapping = {};
-    for (let i = 0; i < n; i++) {
+    const keyMapping = {};
+    const valueMapping = {};
+    for (let i = 0; i < n; i += 1) {
       keyMapping[this.state.pollItems.keys[i]] = i;
       valueMapping[this.state.pollItems.values[i]] = i;
     }
 
-    let key = [], value = [];
-    for (let i = 0; i < n; i++) {
+    const key = [];
+    const value = [];
+    for (let i = 0; i < n; i += 1) {
       key.push(keyMapping[this.refs[`keyChoice${i}`].value]);
       value.push(valueMapping[this.refs[`valueChoice${i}`].value]);
     }
@@ -192,7 +191,7 @@ class RoomDisplay extends React.Component {
     // Check whether the given choice is a valid one or not?
     let copy = key.slice();
     copy.sort();
-    for (let i = 0; i < n; i++)
+    for (let i = 0; i < n; i += 1)
       if (copy[i] !== i) {
         // TODO: Error
         console.log('key error!');
@@ -201,21 +200,21 @@ class RoomDisplay extends React.Component {
 
     copy = value.slice();
     copy.sort();
-    for (let i = 0; i < n; i++)
+    for (let i = 0; i < n; i += 1)
       if (copy[i] !== i) {
         // TODO: Error
         console.log('value error!');
         break;
       }
 
-    let finalMapping = new Array(n);
-    for (let i = 0; i < n; i++)
-      finalMapping[key[i]] = value[i];
+    const finalMapping = new Array(n);
+    for (let i = 0; i < n; i += 1) finalMapping[key[i]] = value[i];
 
-    server.post(`/room/${this.state.name}/poll`, {
-      owner: this.state.owner,
-      order: finalMapping
-    })
+    server
+      .post(`/room/${this.state.name}/poll`, {
+        owner: this.state.owner,
+        order: finalMapping
+      })
       .then(res => {
         if (this.isUnmount) return;
         console.log(res);
@@ -226,17 +225,15 @@ class RoomDisplay extends React.Component {
           // either token expires or user modifies it
           if (err.response.data.token) {
             this.props.logout();
-            return;
           }
         }
       });
-
-  }
+  };
 
   render() {
     const { keys, values } = this.state.pollItems;
-    let keyValuePairs = [];
-    for (let i = 0; i < keys.length; i++)
+    const keyValuePairs = [];
+    for (let i = 0; i < keys.length; i += 1)
       keyValuePairs.push({ key: keys[i], value: values[i] });
 
     return (
@@ -253,12 +250,14 @@ class RoomDisplay extends React.Component {
           <InputGroup.Append>
             <Button
               disabled={!this.state.nameChanged}
-              onClick={this.nameChange}>
+              onClick={this.nameChange}
+            >
               Edit
             </Button>
           </InputGroup.Append>
           <Form.Control.Feedback type="invalid">
-            Name must starts with a letter and should contains only digits and letters
+            Name must starts with a letter and should contains only digits and
+            letters
           </Form.Control.Feedback>
         </InputGroup>
 
@@ -266,11 +265,16 @@ class RoomDisplay extends React.Component {
 
         <div className="d-flex flex-row">
           <Button
-            variant={this.state.status === "active" ? "outline-danger" : "outline-success"}
+            variant={
+              this.state.status === 'active'
+                ? 'outline-danger'
+                : 'outline-success'
+            }
             className="ml-auto mb-2"
             onClick={this.toggleStatus}
-            disabled={this.state.owner !== this.props.auth.email}>
-            {this.state.status === "active" ? "close it" : "open it"}
+            disabled={this.state.owner !== this.props.auth.uid}
+          >
+            {this.state.status === 'active' ? 'close it' : 'open it'}
           </Button>
         </div>
         <Table striped bordered hover>
@@ -287,7 +291,7 @@ class RoomDisplay extends React.Component {
                   <td>{cur.key}</td>
                   <td>{cur.value}</td>
                 </tr>
-              )
+              );
             })}
           </tbody>
         </Table>
@@ -295,26 +299,27 @@ class RoomDisplay extends React.Component {
         <div className="d-flex flex-row">
           <Button
             variant="outline-dark"
-            onClick={() => this.setState({ usersPolledShow: true })}>
+            onClick={() => this.setState({ usersPolledShow: true })}
+          >
             Users Polled
           </Button>
 
           <Button
             className="ml-auto"
             variant="outline-dark"
-            onClick={() => this.setState({ membersListShow: true })}>
+            onClick={() => this.setState({ membersListShow: true })}
+          >
             Members
           </Button>
 
           <VerticallyCentredModal
             show={this.state.usersPolledShow}
             onHide={() => this.setState({ usersPolledShow: false })}
-            heading="Polled users">
+            heading="Polled users"
+          >
             <ListGroup>
               {this.state.usersPolled.map((cur, ind) => (
-                <ListGroup.Item
-                  key={ind}
-                  variant="secondary">
+                <ListGroup.Item key={ind} variant="secondary">
                   <div className="d-flex flex-row flex-wrap text-overflow-control">
                     <b className="text-overflow-control">{cur.givenBy}</b>
                     <i className="ml-auto">
@@ -328,75 +333,88 @@ class RoomDisplay extends React.Component {
 
           <VerticallyCentredModal
             show={this.state.membersListShow}
-            onHide={() => this.setState({
-              membersListShow: false,
-              addUserClicked: false,
-              userError: null
-            })}
-            heading="Room members">
+            onHide={() =>
+              this.setState({
+                membersListShow: false,
+                addUserClicked: false,
+                userError: null
+              })
+            }
+            heading="Room members"
+          >
             {/* Instead of attaching a number of onClick we add only one and here */}
-            <ListGroup
-              onClick={this.deleteMember}>
+            <ListGroup onClick={this.deleteMember}>
               {this.state.members.map((cur, ind) => {
                 return (
                   <ListGroup.Item
                     key={`ListGroupItemShowingMembers${ind}`}
                     className="d-flex flex-row"
-                    variant="info">
+                    variant="info"
+                  >
                     <i className="text-overflow-control">{cur}</i>
-                    {this.state.owner === this.props.auth.email &&
-                      <b
-                        className={`ml-auto deleteMember`}
+                    {this.state.owner === this.props.auth.uid && (
+                      <button
+                        className="ml-auto deleteMember"
                         id={`${cur}`}
-                        style={{ cursor: "pointer" }}>
+                        type="button"
+                        style={{
+                          cursor: 'pointer',
+                          border: 'none',
+                          color: 'inherit',
+                          background: 'none'
+                        }}
+                      >
                         x
-                      </b>}
+                      </button>
+                    )}
                   </ListGroup.Item>
                 );
               })}
             </ListGroup>
 
-            {this.state.owner === this.props.auth.email &&
+            {this.state.owner === this.props.auth.uid && (
               <div className="d-flex flex-row">
-                {this.state.addUserClicked === false ?
+                {this.state.addUserClicked === false ? (
                   <Button
                     variant="outline-success"
                     className="ml-auto mt-3"
-                    style={{ borderRadius: "50px" }}
-                    onClick={() => this.setState({ addUserClicked: true })}>
+                    style={{ borderRadius: '50px' }}
+                    onClick={() => this.setState({ addUserClicked: true })}
+                  >
                     +
                   </Button>
-                  :
-                  <InputGroup className="mt-3">
-                    <Form.Control
-                      placeholder="user's email"
-                      ref="addUserField"
-                      type="text"
-                      isInvalid={(this.state.userError) ? true : false}
-                    />
-                    <InputGroup.Append>
-                      <Button
-                        variant="outline-success"
-                        onClick={this.addMember}>
-                        Add
+                ) : (
+                    <InputGroup className="mt-3">
+                      <Form.Control
+                        placeholder="user's email"
+                        ref="addUserField"
+                        type="text"
+                        isInvalid={this.state.userError ? true : false}
+                      />
+                      <InputGroup.Append>
+                        <Button
+                          variant="outline-success"
+                          onClick={this.addMember}
+                        >
+                          Add
                       </Button>
-                    </InputGroup.Append>
-                    <InputGroup.Append>
-                      <Button
-                        variant="outline-warning"
-                        onClick={() => this.setState({ addUserClicked: false })}>
-                        Cancel
+                      </InputGroup.Append>
+                      <InputGroup.Append>
+                        <Button
+                          variant="outline-warning"
+                          onClick={() => this.setState({ addUserClicked: false })}
+                        >
+                          Cancel
                       </Button>
-                    </InputGroup.Append>
+                      </InputGroup.Append>
 
-                    <Form.Control.Feedback type="invalid">
-                      {this.state.userError}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-
-                }
+                      <Form.Control.Feedback type="invalid">
+                        {this.state.userError}
+                      </Form.Control.Feedback>
+                    </InputGroup>
+                  )}
               </div>
-            }
+            )}
           </VerticallyCentredModal>
         </div>
 
@@ -404,15 +422,16 @@ class RoomDisplay extends React.Component {
         <div className="mt-auto ml-auto mr-auto">
           <Button
             variant="outline-primary"
-            onClick={() => this.setState({ contributeClicked: true })}>
+            onClick={() => this.setState({ contributeClicked: true })}
+          >
             Want to contribute?
           </Button>
 
           <VerticallyCentredModal
             heading={`Polling in the room '${this.state.name}'`}
             onHide={() => this.setState({ contributeClicked: false })}
-            show={this.state.contributeClicked}>
-
+            show={this.state.contributeClicked}
+          >
             <div className="d-flex flex-column">
               <Table bordered striped>
                 <thead>
@@ -424,78 +443,92 @@ class RoomDisplay extends React.Component {
 
                 <tbody>
                   {/* create an array of values [0, 1, 2 .....] */}
-                  {new Array(this.state.pollItems.keys.length).fill(0).map((x, cur) => cur).map(x => (
-                    <tr key={`row${x}`}>
-                      <td>
-                        <InputGroup>
-                          <FormControl
-                            placeholder="key choice"
-                            aria-label="key-choice"
-                            ref={`keyChoice${x}`}
-                          />
-                          <DropdownButton
-                            as={InputGroup.Append}
-                            variant="outline-secondary"
-                            title="select"
-                          >
-                            {this.state.pollItems.keys.map(cur => (
-                              <Dropdown.Item
-                                key={cur}
-                                eventKey={cur}
-                                onSelect={eventKey => this.refs[`keyChoice${x}`].value = eventKey}>
-                                {cur}
-                              </Dropdown.Item>
-                            ))}
-                          </DropdownButton>
-                        </InputGroup>
-                      </td>
-                      <td>
-                        <InputGroup>
-                          <FormControl
-                            placeholder="value choice"
-                            aria-label="value-choice"
-                            ref={`valueChoice${x}`}
-                          />
-                          <DropdownButton
-                            alignRight
-                            as={InputGroup.Append}
-                            variant="outline-secondary"
-                            title="select"
-                          >
-                            {this.state.pollItems.values.map(cur => (
-                              <Dropdown.Item
-                                key={cur}
-                                eventKey={cur}
-                                onSelect={eventKey => this.refs[`valueChoice${x}`].value = eventKey}>
-                                {cur}
-                              </Dropdown.Item>
-                            ))}
-                          </DropdownButton>
-                        </InputGroup>
-                      </td>
-                    </tr>
-                  ))}
+                  {new Array(this.state.pollItems.keys.length)
+                    .fill(0)
+                    .map((x, cur) => cur)
+                    .map(x => (
+                      <tr key={`row${x}`}>
+                        <td>
+                          <InputGroup>
+                            <FormControl
+                              placeholder="key choice"
+                              aria-label="key-choice"
+                              ref={`keyChoice${x}`}
+                            />
+                            <DropdownButton
+                              as={InputGroup.Append}
+                              variant="outline-secondary"
+                              title="select"
+                            >
+                              {this.state.pollItems.keys.map(cur => (
+                                <Dropdown.Item
+                                  key={cur}
+                                  eventKey={cur}
+                                  onSelect={eventKey => {
+                                    this.refs[`keyChoice${x}`].value = eventKey;
+                                  }}
+                                >
+                                  {cur}
+                                </Dropdown.Item>
+                              ))}
+                            </DropdownButton>
+                          </InputGroup>
+                        </td>
+                        <td>
+                          <InputGroup>
+                            <FormControl
+                              placeholder="value choice"
+                              aria-label="value-choice"
+                              ref={`valueChoice${x}`}
+                            />
+                            <DropdownButton
+                              alignRight
+                              as={InputGroup.Append}
+                              variant="outline-secondary"
+                              title="select"
+                            >
+                              {this.state.pollItems.values.map(cur => (
+                                <Dropdown.Item
+                                  key={cur}
+                                  eventKey={cur}
+                                  onSelect={eventKey => {
+                                    this.refs[
+                                      `valueChoice${x}`
+                                    ].value = eventKey;
+                                  }}
+                                >
+                                  {cur}
+                                </Dropdown.Item>
+                              ))}
+                            </DropdownButton>
+                          </InputGroup>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
-
               </Table>
               <Button
                 variant="outline-success"
                 className="ml-auto mr-auto"
-                onClick={this.onPollSubmit}>
+                onClick={this.onPollSubmit}
+              >
                 Submit
               </Button>
             </div>
           </VerticallyCentredModal>
         </div>
-      </div >
+      </div>
     );
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     auth: state.auth
   };
 };
 
-export default connect(mapStateToProps, { logout })(RoomDisplay);
+export default connect(
+  mapStateToProps,
+  { logout }
+)(RoomDisplay);
