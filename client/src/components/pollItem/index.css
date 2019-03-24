@@ -1,0 +1,15 @@
+.poll-item-add {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  cursor: pointer;
+  align-items: center;
+  display: flex;
+}
+
+.poll-add:hover {
+  box-shadow: 4px 4px 12px 0 grey;
+}

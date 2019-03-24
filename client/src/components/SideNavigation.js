@@ -80,7 +80,7 @@ class Scrollspy extends React.Component {
               </div>) : null)}
             </Link>
 
-            <Link className="menu-item" to="/poll-items">
+            <Link className="menu-item" to="/poll-item">
               <div className="menu-item-icon">
                 <img
                   src={require('../images/p.png')}

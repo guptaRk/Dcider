@@ -26,7 +26,6 @@ router.post('/create', auth, (req, res) => {
   if (
     !req.body.keys ||
     !(req.body.keys instanceof Array) ||
-    !req.body.keys.length ||
     !checkIfArrayIsUnique(req.body.keys)
   )
     return res.status(400).json({ keys: 'Keys are mandatory and must be unique' });
@@ -43,7 +42,6 @@ router.post('/create', auth, (req, res) => {
   if (
     !req.body.values ||
     !(req.body.values instanceof Array) ||
-    !req.body.values.length ||
     !checkIfArrayIsUnique(req.body.values)
   )
     return res.status(400).json({ values: 'values are mandatory and must be unique' });
@@ -171,7 +169,7 @@ router.delete('/:name', auth, (req, res) => {
 */
 router.post('/:name/:task', auth, (req, res) => {
   // task can be either add or remove
-  if (req.params.task !== 'add' && req.params.task !== 'remove')
+  if (req.params.task !== 'Add' && req.params.task !== 'Remove')
     return res.status(400).json({ request: 'invalid url' });
 
   // check if the key-value pair is specified in the body part
@@ -194,7 +192,7 @@ router.post('/:name/:task', auth, (req, res) => {
       const keyIndex = result[0].keys.findIndex(x => x === req.body.key);
       const valueIndex = result[0].values.findIndex(x => x === req.body.value);
 
-      if (req.params.task === 'add') {
+      if (req.params.task === 'Add') {
         // check whether the current key or value matches
         // with any previous key or value
         if (keyIndex !== -1 || valueIndex !== -1) {

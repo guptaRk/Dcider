@@ -18,7 +18,6 @@ class XlistCard extends React.Component {
       <Card
         border="dark"
         style={{ cursor: 'pointer' }}
-        onClick={this.onClick}
         id={`${this.props.title}$$${this.props.owner}`}
       >
         {/*

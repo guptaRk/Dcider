@@ -1,8 +1,4 @@
 import React from 'react';
-import CardContainer from './CardContainer';
-import RoomInit from './RoomInit';
-import KeyValuePairsInput from './KeyValuePairsInput';
-import Rooms from './Rooms';
 
 import NoMatch from './NoMatch';
 import Login from './Login';
@@ -11,6 +7,7 @@ import { Switch, Route } from 'react-router';
 import PrivateRoute from './common/PrivateRoute';
 import XList from './xlist/index';
 import Room from './room';
+import PollItem from './pollItem';
 
 class MainContent extends React.Component {
   render() {
@@ -42,6 +39,7 @@ class MainContent extends React.Component {
           <Route exact path="/register" component={Register} />
           <PrivateRoute path="/xlist" component={XList} />
           <PrivateRoute path="/room" component={Room} />
+          <PrivateRoute path="/poll-item" component={PollItem} />
           <Route component={NoMatch} />
         </Switch>
       </div>

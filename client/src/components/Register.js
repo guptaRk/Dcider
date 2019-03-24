@@ -18,13 +18,14 @@ class Register extends React.Component {
     const email = this.refs.email.value;
     const password = this.refs.password.value;
     const name = this.refs.name.value;
+    const uid = this.refs.uid.value;
     const password2 = this.refs.password2.value;
 
     if (password !== password2) {
       this.props.authError({ "password2": "password doesn't match" });
       return;
     }
-    this.props.register(name, email, password);
+    this.props.register(name, email, password, uid);
   }
 
   render() {
@@ -49,6 +50,24 @@ class Register extends React.Component {
                 isInvalid={error.name ? true : false} />
               <Form.Control.Feedback type="invalid">
                 {error.name}
+              </Form.Control.Feedback>
+            </div>
+
+          </Form.Group>
+
+          <Form.Group as={Row}>
+            <Form.Label className="col-sm-3">
+              User-Handle
+            </Form.Label>
+
+            <div className="col-sm-9">
+              <Form.Control
+                type="text"
+                ref="uid"
+                placeholder="your_handle"
+                isInvalid={(error.uid) ? true : false} />
+              <Form.Control.Feedback type="invalid">
+                {error.uid}
               </Form.Control.Feedback>
             </div>
 

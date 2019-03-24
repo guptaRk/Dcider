@@ -1,5 +1,4 @@
 import React from 'react';
-import server from '../../Axios';
 import {
   InputGroup,
   Form,
@@ -12,6 +11,8 @@ import {
 } from 'react-bootstrap';
 import { FaPlus } from 'react-icons/fa';
 import { connect } from 'react-redux';
+
+import server from '../../Axios';
 import { logout } from '../../actions/auth';
 import VerticallyCentredModal from '../common/VerticallyCentredModal';
 import getTimeDifference from '../../utils/getTimeDifference';
@@ -43,13 +44,12 @@ class RoomDisplay extends React.Component {
     usersPolledShow: false,
     membersListShow: false,
 
-    //adding a member
+    // adding a member
     userError: null,
     addUserClicked: false,
 
-    //adding a poll
+    // adding a poll
     contributeClicked: false,
-    addPollError: "",
 
     // updating the list of poll-item
     updatePollItemShow: false,
@@ -80,13 +80,19 @@ class RoomDisplay extends React.Component {
       })
       .catch(err => {
         if (this.isUnmount) return;
-        if (err.response && err.response.status === 400 && err.response.data.token) {
+        if (
+          err.response &&
+          err.response.status === 400 &&
+          err.response.data.token
+        ) {
           // either token expires or user modifies it
           this.props.logout();
           return;
         }
+        // other errors
+        console.log(err);
       });
-  }
+  };
 
   // for getting an appropraite mapping from the result array
   mapTheResult = () => {
@@ -95,8 +101,11 @@ class RoomDisplay extends React.Component {
     // the result array gives the position in the value array
     // that match with the given index's key
 
-    for (let i = 0; i < this.state.pollItem.values.length; i++)
-      this.state.pollItem.values[i] = values[this.state.result[i]];
+    this.setState(prvState => {
+      for (let i = 0; i < prvState.pollItem.values.length; i += 1)
+        prvState.pollItem.values[i] = values[prvState.result[i]];
+      return prvState;
+    });
   };
 
   onNameChange = evt => {
@@ -133,6 +142,7 @@ class RoomDisplay extends React.Component {
           this.props.logout();
           return;
         }
+        console.log(err);
       });
   };
 
@@ -141,7 +151,7 @@ class RoomDisplay extends React.Component {
     if (!element.classList.contains('deleteMember')) return;
     server
       .post(`/room/remove/member/${this.state.name}`, { email: element.id })
-      .then(result => {
+      .then(() => {
         if (this.isUnmount) return;
         this.setState(prvState => {
           return {
@@ -150,14 +160,15 @@ class RoomDisplay extends React.Component {
         });
       })
       .catch(err => {
+        if (this.isUnmount) return;
         if (err.response && err.response.status === 400) {
-          if (this.isUnmount) return;
           // either token expires or user modifies it
           if (err.response.data.token) {
             this.props.logout();
             return;
           }
         }
+        console.log(err);
       });
   };
 
@@ -165,31 +176,33 @@ class RoomDisplay extends React.Component {
     this.setState({ usersPolledShow: true });
     // TODO: write an end-point to get this data only
     this.refreshRoom();
-  }
+  };
 
   membersClicked = () => {
     this.setState({ membersListShow: true });
     // TODO: write an end-point to get this data only
     this.refreshRoom();
-  }
+  };
 
   updatePollItemClicked = () => {
     this.setState({ updatePollItemShow: true });
     // TODO: write an end-point to get this data only
     this.refreshRoom();
-  }
+  };
 
   onAddOrRemovePollItemClicked = () => {
     const key = this.refs.addOrRemovePollItemKey.value;
     const value = this.refs.addOrRemovePollItemValue.value;
 
     // sends the request to the server to add or remove the poll-item
-    const requestString = this.state.addOrRemovePollItemClicked === "Add"
-      ? `/room/add/pollItem/${this.state.name}`
-      : `/room/remove/pollItem/${this.state.name}`;
+    const requestString =
+      this.state.addOrRemovePollItemClicked === 'Add'
+        ? `/room/add/pollItem/${this.state.name}`
+        : `/room/remove/pollItem/${this.state.name}`;
 
-    server.post(requestString, { key, value })
-      .then((result) => {
+    server
+      .post(requestString, { key, value })
+      .then(result => {
         if (this.isUnmount) return;
 
         console.log(result.data.pollItems);
@@ -207,13 +220,15 @@ class RoomDisplay extends React.Component {
             return;
           }
           // poll-item error
-          this.setState({ addOrRemovePollItemError: err.response.data.pollitem });
+          this.setState({
+            addOrRemovePollItemError: err.response.data.pollitem
+          });
           return;
         }
         // Internal server error
         console.log(err);
       });
-  }
+  };
 
   addMember = () => {
     const email = this.refs.addUserField.value;
@@ -238,6 +253,8 @@ class RoomDisplay extends React.Component {
             this.setState({ userError: err.response.data.user });
             return;
           }
+          // other errors
+          console.log(err);
         }
       });
   };
@@ -245,7 +262,8 @@ class RoomDisplay extends React.Component {
   onPollSubmit = () => {
     const n = this.state.pollItem.keys.length;
 
-    // make a mapping which is helpful for assigning indexes to the keys and values
+    // make a mapping which is helpful for assigning
+    // indexes to the keys and values
     const keyMapping = {};
     const valueMapping = {};
     for (let i = 0; i < n; i += 1) {
@@ -289,9 +307,13 @@ class RoomDisplay extends React.Component {
       })
       .then(() => {
         if (this.isUnmount) return;
-        this.refs.addPollError.innerHTML = '<p style="color: green">Successfully recorded</p>';
+        this.refs.addPollError.innerHTML =
+          '<p style="color: green">Successfully recorded</p>';
         // close the modal after a slight delay
-        window.setTimeout(() => this.setState({ contributeClicked: false }), 1000);
+        window.setTimeout(
+          () => this.setState({ contributeClicked: false }),
+          1000
+        );
       })
       .catch(err => {
         if (this.isUnmount) return;
@@ -314,13 +336,17 @@ class RoomDisplay extends React.Component {
 
   resultClicked = () => {
     if (this.state.status === 'active') return;
-    server.get(`/room/${this.state.owner}/${this.state.name}/result`)
+    server
+      .get(`/room/${this.state.owner}/${this.state.name}/result`)
       .then(result => {
         if (this.isUnmount) return;
         const ordering = result.data.result;
         const mapping = [];
-        for (let i = 0; i < this.state.pollItem.keys.length; i++)
-          mapping.push([this.state.pollItem.keys[i], this.state.pollItem.values[ordering[i]]]);
+        for (let i = 0; i < this.state.pollItem.keys.length; i += 1)
+          mapping.push([
+            this.state.pollItem.keys[i],
+            this.state.pollItem.values[ordering[i]]
+          ]);
 
         this.setState({ finalkeyValueResult: mapping });
       })
@@ -338,7 +364,7 @@ class RoomDisplay extends React.Component {
       });
 
     this.setState({ resultDisplayClicked: true });
-  }
+  };
 
   render() {
     console.log(this.state.owner, this.props.auth.uid);
@@ -380,7 +406,8 @@ class RoomDisplay extends React.Component {
             disabled={this.state.status === 'active'}
             variant="outline-info"
             className="mb-2"
-            onClick={this.resultClicked}>
+            onClick={this.resultClicked}
+          >
             Results
           </Button>
 
@@ -401,7 +428,8 @@ class RoomDisplay extends React.Component {
         <VerticallyCentredModal
           heading={`Final results of poll-room '${this.state.name}'`}
           show={this.state.resultDisplayClicked}
-          onHide={() => this.setState({ resultDisplayClicked: false })}>
+          onHide={() => this.setState({ resultDisplayClicked: false })}
+        >
           <Table striped>
             <thead>
               <tr>
@@ -428,9 +456,9 @@ class RoomDisplay extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {keyValuePairs.map((cur, ind) => {
+            {keyValuePairs.map(cur => {
               return (
-                <tr key={ind}>
+                <tr key={`pollItem_${cur.key}`}>
                   <td>{cur.key}</td>
                   <td>{cur.value}</td>
                 </tr>
@@ -440,14 +468,11 @@ class RoomDisplay extends React.Component {
         </Table>
 
         <div className="d-flex flex-row">
-          <Button
-            variant="outline-dark"
-            onClick={this.usersPolledClicked}
-          >
+          <Button variant="outline-dark" onClick={this.usersPolledClicked}>
             Users Polled
           </Button>
 
-          {this.state.owner === this.props.auth.uid &&
+          {this.state.owner === this.props.auth.uid && (
             <Button
               className="poll-item-add"
               variant="outline-primary"
@@ -455,7 +480,7 @@ class RoomDisplay extends React.Component {
             >
               <FaPlus style={{ margin: 'auto' }} />
             </Button>
-          }
+          )}
 
           <Button
             className="ml-auto"
@@ -471,8 +496,11 @@ class RoomDisplay extends React.Component {
             heading="Polled users"
           >
             <ListGroup>
-              {this.state.usersPolled.map((cur, ind) => (
-                <ListGroup.Item key={ind} variant="secondary">
+              {this.state.usersPolled.map(cur => (
+                <ListGroup.Item
+                  key={`usersPolledShow_${cur.givenBy}`}
+                  variant="secondary"
+                >
                   <div className="d-flex flex-row flex-wrap text-overflow-control">
                     <b className="text-overflow-control">{cur.givenBy}</b>
                     <i className="ml-auto">
@@ -486,7 +514,12 @@ class RoomDisplay extends React.Component {
 
           <VerticallyCentredModal
             show={this.state.updatePollItemShow}
-            onHide={() => this.setState({ updatePollItemShow: false, addOrRemovePollItemClicked: null })}
+            onHide={() =>
+              this.setState({
+                updatePollItemShow: false,
+                addOrRemovePollItemClicked: null
+              })
+            }
             heading="Poll-Items in the current room"
           >
             {/* show the current poll-items */}
@@ -507,19 +540,30 @@ class RoomDisplay extends React.Component {
               </tbody>
             </Table>
             {/* Add options to add (or remove) a poll-item */}
-            {this.state.addOrRemovePollItemClicked === null &&
+            {this.state.addOrRemovePollItemClicked === null && (
               <div className="d-flex flex-row">
-                <Button variant="outline-info" onClick={() => this.setState({ addOrRemovePollItemClicked: "Add" })}>
+                <Button
+                  variant="outline-info"
+                  onClick={() =>
+                    this.setState({ addOrRemovePollItemClicked: 'Add' })
+                  }
+                >
                   Add
-               </Button>
-                <Button className="ml-auto" variant="outline-danger" onClick={() => this.setState({ addOrRemovePollItemClicked: "Remove" })}>
+                </Button>
+                <Button
+                  className="ml-auto"
+                  variant="outline-danger"
+                  onClick={() =>
+                    this.setState({ addOrRemovePollItemClicked: 'Remove' })
+                  }
+                >
                   Delete
                 </Button>
               </div>
-            }
+            )}
 
             {/* show the input fields */}
-            {this.state.addOrRemovePollItemClicked &&
+            {this.state.addOrRemovePollItemClicked && (
               <InputGroup>
                 <Form.Control
                   type="text"
@@ -534,18 +578,26 @@ class RoomDisplay extends React.Component {
                   isInvalid={this.state.addOrRemovePollItemError !== null}
                 />
                 <InputGroup.Append>
-                  <Button variant="outline-dark" onClick={this.onAddOrRemovePollItemClicked}>
+                  <Button
+                    variant="outline-dark"
+                    onClick={this.onAddOrRemovePollItemClicked}
+                  >
                     {this.state.addOrRemovePollItemClicked}
                   </Button>
-                  <Button onClick={() => this.setState({ addOrRemovePollItemClicked: null })} variant="outline-dark">
+                  <Button
+                    onClick={() =>
+                      this.setState({ addOrRemovePollItemClicked: null })
+                    }
+                    variant="outline-dark"
+                  >
                     Cancel
-                </Button>
+                  </Button>
                 </InputGroup.Append>
                 <Form.Control.Feedback type="invalid">
                   {this.state.addOrRemovePollItemError}
                 </Form.Control.Feedback>
               </InputGroup>
-            }
+            )}
           </VerticallyCentredModal>
 
           <VerticallyCentredModal
@@ -559,12 +611,14 @@ class RoomDisplay extends React.Component {
             }
             heading="Room members"
           >
-            {/* Instead of attaching a number of onClick we add only one and here */}
+            {/* Instead of attaching a number of onClick
+             * we add only one and here
+             */}
             <ListGroup onClick={this.deleteMember}>
-              {this.state.members.map((cur, ind) => {
+              {this.state.members.map(cur => {
                 return (
                   <ListGroup.Item
-                    key={`ListGroupItemShowingMembers${ind}`}
+                    key={`ListGroupItemShowingMembers${cur}`}
                     className="d-flex flex-row"
                     variant="info"
                   >
@@ -633,10 +687,10 @@ class RoomDisplay extends React.Component {
               </div>
             )}
           </VerticallyCentredModal>
-        </div >
+        </div>
 
         {/* For adding a poll in the current room */}
-        < div className="mt-auto ml-auto mr-auto" >
+        <div className="mt-auto ml-auto mr-auto">
           <Button
             variant="outline-primary"
             onClick={() => this.setState({ contributeClicked: true })}
@@ -735,8 +789,8 @@ class RoomDisplay extends React.Component {
               </Button>
             </div>
           </VerticallyCentredModal>
-        </div >
-      </div >
+        </div>
+      </div>
     );
   }
 }
