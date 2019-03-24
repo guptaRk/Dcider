@@ -246,7 +246,7 @@ router.get('/:type/:name/', auth, (req, res) => {
         members: room[0].xlist,
         name: room[0].name,
         description: room[0].description,
-        pollItems: room[0].pollItem,
+        pollItem: room[0].pollItem,
         status: room[0].status,
         usersPolled: filteredPolls,
         result: room[0].result,
@@ -332,7 +332,7 @@ router.post('/:action/member/:room', auth, (req, res) => {
         room[0].xlist.push(req.body.email);
       } else {
         // If there exist a user to remove or not
-        if (!room[0].xlist.includes(req.body.email)) {
+        if (!room[0].xlist.includes(req.body.emaiothersl)) {
           res.status(400).json({ user: 'no user to delete' });
           return null;
         }
@@ -442,9 +442,11 @@ router.post('/:action/pollitem/:room', auth, (req, res) => {
 });
 
 /*
-  @route    POST api/room/:room/poll
-  @descrp   add (or edit) a poll in the room mentioned
-  @access   private
+  @route      POST api/room/:room/poll
+  @descrp     add (or edit) a poll in the room mentioned
+  @access     private
+  @bodyparm   ordering according to keys stored in db (order)
+              owner's uid of the room (owner)
 */
 // TODO: test this route
 router.post('/:room/poll', auth, (req, res) => {
@@ -475,12 +477,12 @@ router.post('/:room/poll', auth, (req, res) => {
       seq.sort();
       for (let i = 0; i < n; i += 1)
         if (seq.length !== n || i !== seq[i]) {
-          res.status(400).json({ order: 'invalid ordering of pollItems' });
+          res.status(400).json({ order: 'invalid ordering of key(or values) of poll-Items' });
           return null;
         }
 
       // check whether the curent user is a member of the poll or not
-      if (!room[0].xlist.includes(req.user.uid)) {
+      if (!room[0].xlist.includes(req.user.email)) {
         res.status(400).json({ user: 'You are not a member of this room' });
         return null;
       }
@@ -534,10 +536,102 @@ router.post('/:room/poll', auth, (req, res) => {
 });
 
 /*
-  @route    GET api/room/:room/result
-  @descrp   compute and get the poll result
+  @route    GET api/room/:owner/:name/result
+  @descrp   compute and get the poll result of the mentioned room
   @access   private
 */
-router.get('/:room/result', auth, (req, res) => { });
+router.get('/:owner/:name/result', auth, (req, res) => {
+  Room.findOne({ owner: req.params.owner, name: req.params.name, xlist: req.user.email })
+    .then(room => {
+      if (!room) {
+        res.status(400).json({ reason: "Invalid room or you are not a member" });
+        return null;
+      }
+      if (room.status === 'active') {
+        res.status(400).json({ reason: "The poll is not yet over. Wait for it's completion" });
+        return null;
+      }
+
+      const keys = room.cntKeys, values = room.cntValues;
+
+      for (let j = 0; j < keys.length; j++) {
+        let key_map = [], value_map = [];
+
+        for (let i = 0; i < keys[j].length; i++) {
+          key_map.push([keys[j][i], i]);
+          value_map.push([values[j][i], i]);
+        }
+        key_map.sort();
+        value_map.sort();
+
+        key_map.reverse();
+        value_map.reverse();
+
+        for (let i = 0; i < key_map.length; i++) {
+          keys[j][i] = key_map[i][1];
+          // reverse mapping for values to optimize the query
+          values[j][value_map[i][1]] = i;
+        }
+      }
+
+      let requests = [];
+      let matching = [];
+      let rejected = [];
+      // Initializing the proposal array and matching array
+      for (let i = 0; i < keys.length; i++) {
+        rejected.push(i);   // Indicates that the key-i's previous request was rejected
+        requests.push(0);   // 'max-index-1' to which key-i has requested
+        matching.push(-1);  // currently value-i is matched to nothing
+      }
+
+      while (rejected.length !== 0) {
+        let new_rejection_list = [];
+
+        for (let j = 0; j < rejected.length; j++) {
+          // make the request to the next better choice
+          let req = keys[rejected[j]][requests[rejected[j]]];
+          requests[rejected[j]]++;
+
+          if (matching[req] === -1) {
+            // the requested value is not engaged with anyone now
+            matching[req] = rejected[j];
+          }
+          else if (matching[req] > values[req][rejected[j]]) {
+            // current proposal is better than what req-value is engaged with
+            let current_engaged_key = matching[req];
+            matching[req] = rejected[j];
+            // previous proposal is now rejected as it found a better choice
+            new_rejection_list.push(current_engaged_key);
+          }
+          else {
+            // again the current request is rejected as the requested value is currently
+            // engaged with someone other whom it prefers more
+            new_rejection_list.push(rejected[j]);
+          }
+        }
+
+        rejected = [];
+        for (let i = 0; i < new_rejection_list.length; i++)
+          rejected.push(new_rejection_list[i]);
+      }
+
+      let final_key_mapping = [];
+      for (let i = 0; i < matching.length; i++) final_key_mapping.push(-1);
+      for (let i = 0; i < matching.length; i++)
+        final_key_mapping[matching[i]] = i;
+
+      return Room.findByIdAndUpdate(room._id, { $set: { result: final_key_mapping } }, { new: true });
+    })
+    .then(result => {
+      if (!result) {
+        // if the response is already sent to the client
+        return;
+      }
+      res.json({ result: result.result });
+    })
+    .catch(err => {
+      res.status(500).send(err);
+    });
+});
 
 export default router;

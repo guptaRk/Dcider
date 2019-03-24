@@ -26,7 +26,24 @@ class RoomCard extends React.Component {
         style={{ cursor: 'pointer' }}
         id={`${this.props.name}$$${this.props.owner}`}
       >
-        <Card.Header>{this.props.name}</Card.Header>
+        <Card.Header className="d-flex flex-row">
+          <b>{this.props.name}</b>
+          {this.props.type === 'my' &&
+            <button
+              id={`delete$$${this.props.name}`}
+              style={{
+                marginLeft: 'auto',
+                cursor: 'pointer',
+                border: 'none',
+                color: 'inherit',
+                background: 'none'
+              }}
+              type="button"
+            >
+              x
+          </button>
+          }
+        </Card.Header>
         <Card.Body>
           {this.props.type === 'others' && (
             <p className="border border-info p-2 text-dark bg-light">

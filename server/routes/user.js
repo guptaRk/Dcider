@@ -130,7 +130,8 @@ router.post('/login', async (req, res) => {
       res.setHeader('x-auth-token', user.getToken());
       res.json({
         name: user.name,
-        email: user.email
+        email: user.email,
+        uid: user.uid
       });
     })
     .catch(err => {
