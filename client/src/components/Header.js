@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 import '../App.css';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { logout } from '../actions/auth';
@@ -25,7 +25,16 @@ class Header extends Component {
   render() {
     return (
       <Navbar bg="light" fixed="top" style={{ height: 60 }} expand="sm">
-        <Navbar.Brand className="ml-5">Decider</Navbar.Brand>
+        <Navbar.Brand className="ml-5">
+          <Link
+            to="/"
+            style={{
+              textDecoration: "none",
+              color: "inherit"
+            }}>
+            Decider
+          </Link>
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           {(this.props.auth.isAuthenticated === false) ?

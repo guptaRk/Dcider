@@ -31,7 +31,7 @@ class Login extends React.Component {
       return <Redirect to={from} />
     }
     return (
-      <div>
+      <div className="m-auto border border-light p-4">
         <Form noValidate>
 
           <Form.Group as={Row}>

@@ -8,7 +8,6 @@ const stateStructure = {
 };
 
 export const auth = (prvState = stateStructure, action) => {
-  console.log("Auth reducer called : ", prvState.email);
   if (action.type === AUTH_ERROR) {
     // some error occured due to invalid request during authentication
     return { isAuthenticated: false, error: action.payload, email: null, uid: null };

@@ -13,7 +13,6 @@ export const login = (email, password) => {
 
         // set the token in header of every outgoing request
         server.defaults.headers["x-auth-token"] = (response.headers["x-auth-token"]);
-        console.log('server : ', server);
 
         dispatch(successfulLogin(response.data));
       })
@@ -61,7 +60,7 @@ export const authError = (data) => {
 }
 
 export const successfulLogin = (data) => {
-  console.log("successful login", data);
+  // console.log("successful login", data);
   // set the token in header of every outgoing request
   server.defaults.headers["x-auth-token"] = localStorage.getItem('x-auth-token');
 

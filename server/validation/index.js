@@ -30,8 +30,10 @@ export const userName = givenName => {
 };
 
 export const keyValue = given => {
-  const regex = /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/;
-  return regex.test(given);
+  /*const regex = /^([a-zA-Z]([a-zA-Z_0-9 ]){0,249})$/;
+  return regex.test(given);*/
+  if (given instanceof Object || given.length > 250 || given.length < 1) return 0;
+  return 1;
 };
 
 export const description = desc => {

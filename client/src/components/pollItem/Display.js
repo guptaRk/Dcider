@@ -152,6 +152,9 @@ class Display extends React.Component {
                   ref="keyName"
                   isInvalid={this.state.addError !== null}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {this.state.addError}
+                </Form.Control.Feedback>
               </Col>
             </Form.Group>
 
@@ -167,12 +170,11 @@ class Display extends React.Component {
                   ref="valueName"
                   isInvalid={this.state.addError !== null}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {this.state.addError}
+                </Form.Control.Feedback>
               </Col>
             </Form.Group>
-
-            <Form.Control.Feedback type="invalid">
-              {this.state.addError}
-            </Form.Control.Feedback>
 
             <Button
               variant="outline-success"

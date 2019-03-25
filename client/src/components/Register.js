@@ -34,7 +34,7 @@ class Register extends React.Component {
     if (isAuthenticated) return <Redirect to="/me" />
 
     return (
-      <div>
+      <div className="border border-light m-auto p-4">
         <Form noValidate>
 
           <Form.Group as={Row}>

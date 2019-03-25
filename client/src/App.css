@@ -45,8 +45,6 @@ body{
     flex-direction: column;
     height: 100%;
     width: 250px;
-    /* To Hide the text when sideNav shrinks */
-    overflow-x: hidden;
 }
 
 .sideNav-item {
@@ -110,15 +108,6 @@ body{
 .sideNav--hide {
     width: 70px;
 }
-
-.img-hamburger--show-shadow {
-    /* box-shadow: 1px 1px 2px; */
-}
-
-.img-hamburger--hide-shadow {
-    box-shadow: none;
-}
-
 /*
 ---- END OF MODIFIER ----
 */
@@ -169,50 +158,6 @@ body{
     flex: 1 0 auto;
 }
 
-/*
-TODO : ADDING MEDIA QUERIES
-*/
-/*
-.card {
-    width: 150px;
-    height: 100px;
-    margin-right: 50px;
-    margin-bottom: 50px;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-}
-
-.card:hover {
-    background: #f46f6f;
-    cursor: pointer;
-}
-
-@media (min-width: 390px) and (max-width: 440px) {
-    .card{
-        width: 120px;
-    }
-}
-
-@media (min-width: 845px) {
-    .card{
-        height: 120px;
-    }
-}
-
-@media (min-width: 920px) {
-    .card{
-        width: 170px;
-    }
-}
-
-@media (min-width: 1100px) {
-    .card{
-        width: 210px;
-    }
-}
-*/
-
 /* For the sideNavigation menu and it's item */
 
 .menu {
@@ -234,6 +179,7 @@ TODO : ADDING MEDIA QUERIES
 
 .menu-item-text {
     width: 180px;
+    color: dimgray;
     padding: 15px;
 }
 
@@ -245,7 +191,7 @@ TODO : ADDING MEDIA QUERIES
 /* SIDENAVIGATION ENDS HERE */
 
 .menu-item:hover{
-    background: #4286f4;
+    background: #D3D3D3	;
     cursor: pointer;
 }
 

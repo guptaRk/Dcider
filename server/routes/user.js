@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 
+import auth from '../middlewares/auth';
 import User from '../models/User';
 import validateEmail, {
   password as validatePassword,
@@ -139,6 +140,58 @@ router.post('/login', async (req, res) => {
       res.status(500).send(err);
     });
   return 0;
+});
+
+/*
+  @route      POST api/users/password-change
+  @descrp     change the password of the current user
+  @access     private
+  @bodyparm   user's old password(oldPass), user's new password(newPass)
+*/
+router.post('/password-change', auth, (req, res) => {
+  // check the body-parameters
+  if (!req.body.newPass || !req.body.oldPass)
+    return res
+      .status(400)
+      .json({ "password-fields": "Both old and new passwords are required." });
+
+  if (!validatePassword(req.body.newPass) || !validatePassword(req.body.oldPass))
+    return res
+      .status(400)
+      .json({ "password": "Password must be atleast 5 characters long" });
+
+  const userPromise = User.findOne({ uid: req.user.uid });
+  const passwordCheckPromise =
+    userPromise.then(user => bcrypt.compare(req.body.oldPass, user.password));
+  const generateHashPromise =
+    passwordCheckPromise.then(passwordCheck => {
+      if (!passwordCheck) {
+        res.status(400).json({ "password": "password doesn't match" });
+        return null;
+      }
+
+      return bcrypt.hash(req.body.newPass, saltRounds);
+    });
+
+  Promise.all([userPromise, generateHashPromise])
+    .then(([user, hashedPassword]) => {
+      if (!hashedPassword) {
+        // response has already sent to the client
+        return null;
+      }
+
+      return User.findByIdAndUpdate({ _id: user._id }, { $set: { password: hashedPassword } });
+    })
+    .then(result => {
+      if (!result) {
+        // response has already sent to the client
+        return;
+      }
+      res.json({ 'result': 'Password updated successfully!' });
+    })
+    .catch(err => {
+      res.status(500).send(err);
+    });
 });
 
 export default router;

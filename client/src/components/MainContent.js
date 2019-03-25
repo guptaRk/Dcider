@@ -8,35 +8,18 @@ import PrivateRoute from './common/PrivateRoute';
 import XList from './xlist/index';
 import Room from './room';
 import PollItem from './pollItem';
+import Landing from './Landing';
+import Profile from './Profile';
 
 class MainContent extends React.Component {
   render() {
-    /*<div className="h-100 d-flex flex-grow-1 flex-column">
-                    <CardContainer
-                        cards={[{ title: "abcd", date: "1234" },
-                        { title: "abcd", date: "1234" },
-                        { title: "abcd", date: "1234" },
-                        { title: "abcd", date: "1234" }]} />
-
-                    <hr style={{ width: "100%" }} />
-
-                    <CardContainer
-                        cards={[{ title: "abcd", date: "1234" }]} />
-                </div>
-
-                <RoomInit />
-
-                <KeyValuePairsInput
-                    title="Get The Title From the RoomInit component"
-                    items={5} />
-
-        <Rooms />*/
-
     return (
       <div className="d-flex flex-column main-content main-content-without-footer">
         <Switch>
+          <Route exact path="/" component={Landing} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
+          <PrivateRoute exact path="/me" component={Profile} />
           <PrivateRoute path="/xlist" component={XList} />
           <PrivateRoute path="/room" component={Room} />
           <PrivateRoute path="/poll-item" component={PollItem} />
