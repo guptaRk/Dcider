@@ -53,6 +53,14 @@ class App extends Component {
   }
 
   render() {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      window.location.href.includes('http://')
+    ) {
+      const url = `https://${window.location.href.split('http://')[1]}`;
+      window.location.href = url;
+    }
+
     return (
       <div
         className={"d-flex flex-column h-100 " +
