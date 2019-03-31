@@ -23,7 +23,7 @@ class RoomCardContainer extends React.Component {
   isUnmount = false;
 
   state = {
-    currentlySelected: 'Active Rooms',
+    currentlySelected: 'Active',
     currentType: 'my',
 
     cardClicked: false,
@@ -126,8 +126,8 @@ class RoomCardContainer extends React.Component {
 
   dropDownSelect = eventKey => {
     if (eventKey === 'active')
-      this.setState({ currentlySelected: 'Active Rooms' });
-    else this.setState({ currentlySelected: 'Closed (or Inactive) Rooms' });
+      this.setState({ currentlySelected: 'Active' });
+    else this.setState({ currentlySelected: 'Closed' });
     this.refreshRooms(this.state.currentType, eventKey);
   };
 
@@ -210,13 +210,13 @@ class RoomCardContainer extends React.Component {
     if (eventKey === 'myRooms')
       this.setState({
         currentType: 'my',
-        currentlySelected: 'Active Rooms',
+        currentlySelected: 'Active',
         rooms: []
       });
     else
       this.setState({
         currentType: 'others',
-        currentlySelected: 'Active Rooms',
+        currentlySelected: 'Active',
         rooms: []
       });
     this.refreshRooms(eventKey === 'myRooms' ? 'my' : 'others', 'active');
@@ -235,7 +235,7 @@ class RoomCardContainer extends React.Component {
     }
 
     const borderColor =
-      this.state.currentlySelected === 'Active Rooms' ? 'green' : 'red';
+      this.state.currentlySelected === 'Active' ? 'green' : 'red';
     return (
       <Tabs defaultActiveKey="myRooms" onSelect={this.onTabSelect}>
         <Tab title="My Rooms" eventKey="myRooms">
@@ -251,14 +251,14 @@ class RoomCardContainer extends React.Component {
                 eventKey="active"
                 onSelect={this.dropDownSelect}
               >
-                Active Rooms
+                Active
               </Dropdown.Item>
               <Dropdown.Item
                 as={Button}
                 eventKey="closed"
                 onSelect={this.dropDownSelect}
               >
-                Closed (or Inactive) Rooms
+                Closed
               </Dropdown.Item>
             </DropdownButton>
 
@@ -362,14 +362,14 @@ class RoomCardContainer extends React.Component {
                 eventKey="active"
                 onSelect={this.dropDownSelect}
               >
-                Active Rooms
+                Active
               </Dropdown.Item>
               <Dropdown.Item
                 as={Button}
                 eventKey="closed"
                 onSelect={this.dropDownSelect}
               >
-                Closed (or Inactive) Rooms
+                Closed
               </Dropdown.Item>
             </DropdownButton>
 

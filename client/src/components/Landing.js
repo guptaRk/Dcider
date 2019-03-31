@@ -14,12 +14,12 @@ class Landing extends React.Component {
           </Card.Header>
           <Card.Body className="d-flex flex-column">
             <p>
-              some text that is quite long to sepatate the two buttons
+              Confused? Immediately poll your options in just few clicks!
             </p>
             {this.props.auth.isAuthenticated === true
               ? <Button
                 variant="outline-danger"
-                onClick={this.props.logout()}
+                onClick={this.props.logout}
               >
                 Logout
                 </Button>

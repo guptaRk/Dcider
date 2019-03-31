@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Button, Form, Row } from 'react-bootstrap';
+import { connect } from 'react-redux';
 
 import VerticallyCentredModal from './common/VerticallyCentredModal';
 import server from '../Axios';
@@ -58,7 +59,8 @@ class Profile extends React.Component {
             <b>Profile</b>
           </Card.Header>
           <Card.Body className="d-flex flex-column">
-            <p>Information about the current user</p>
+            <Card.Title>{this.props.auth.name}</Card.Title>
+            <Card.Text className="text-muted">{this.props.auth.uid}</Card.Text>
             <Button
               className="ml-auto mr-auto"
               variant="outline-info"
@@ -125,4 +127,10 @@ class Profile extends React.Component {
   }
 }
 
-export default Profile;
+const mapStateToProps = state => {
+  return {
+    auth: state.auth
+  };
+};
+
+export default connect(mapStateToProps)(Profile);

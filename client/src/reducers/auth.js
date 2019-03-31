@@ -4,7 +4,8 @@ const stateStructure = {
   isAuthenticated: false,
   email: null,
   uid: null,
-  error: {}
+  error: {},
+  name: null
 };
 
 export const auth = (prvState = stateStructure, action) => {
@@ -16,6 +17,7 @@ export const auth = (prvState = stateStructure, action) => {
     return {
       isAuthenticated: true,
       error: {},
+      name: action.payload.name,
       email: action.payload.email,
       uid: action.payload.uid
     };

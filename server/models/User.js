@@ -7,6 +7,65 @@ import validateEmail, {
   userName as validateUserName
 } from '../validation/index';
 
+const pollItemSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  itemCount: {
+    type: Number,
+    required: true,
+    get: v => Math.round(v),
+    set: v => Math.round(v)
+  },
+  pollItem: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'pollItem'
+  }
+});
+
+const ownRoomSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    validate: {
+      validator: validateName,
+      message:
+        "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet"
+    }
+  },
+  room: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'room'
+  }
+});
+
+const otherRoomSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    validate: {
+      validator: validateName,
+      message: "name field is alphanumeric(may contains underscore'_')"
+    }
+  },
+  owner: {
+    type: String,
+    required: true,
+    validate: {
+      validator: validateEmail,
+      message: 'Email is invalid'
+    }
+  },
+  room: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'room'
+  }
+});
+
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -77,7 +136,7 @@ userSchema.methods.getToken = function () {
   const token = jwt.sign(
     {
       data: payload,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 // 1hr of expiry
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 12 // 1hr of expiry
     },
     jwtPrivateKey
   );

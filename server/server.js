@@ -26,16 +26,19 @@ Fawn.init(mongoose);
 
 app.use(express.json());
 
-/*
-app.get('/', (req, res) => {
-  console.log('request received!');
-  res.send('Hello world!');
-});
-*/
 app.use('/api/users', user);
 app.use('/api/xlist', xlist);
 app.use('/api/room', room);
 app.use('/api/pollItem', pollItem);
+
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  app.use(express.static(path.join(__dirname, '../../client/build/')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../client/build/index.html'));
+  });
+}
 
 const port = process.env.port || 5000;
 

@@ -67,9 +67,7 @@ class App extends Component {
 
         <MainContent />
 
-        {/* yaha div */}
-        <Footer />
-        {/* yaha end */}
+        {/* <Footer /> */}
       </div >
 
     );
