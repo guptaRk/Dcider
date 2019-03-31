@@ -19,7 +19,7 @@ const saltRounds = 10;
   @bodyparm   user's email(email), user's password(password),
               user's userid(uid), user's name(name)
 */
-router.post('/register', async (req, res) => {
+router.post('/register', (req, res) => {
   // verify the body parameters
   if (!req.body.email || !validateEmail(req.body.email))
     return res.status(400).json({ email: 'provide a valid email' });
@@ -100,7 +100,7 @@ router.post('/register', async (req, res) => {
   @access     public
   @bodyparm   user's email(email), user's password(password)
 */
-router.post('/login', async (req, res) => {
+router.post('/login', (req, res) => {
   // validate the request body details
   if (!req.body.email || !validateEmail(req.body.email))
     return res.status(400).json({ email: 'Not a valid email' });
