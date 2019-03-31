@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 import '../App.css';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter, Link, Redirect } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { logout } from '../actions/auth';
@@ -11,6 +11,10 @@ class Header extends Component {
     super(props);
     this.logout = this.logout.bind(this);
   }
+
+  state = {
+    profileClicked: false
+  };
 
   menu_click(e) {
     console.log(e);
@@ -24,7 +28,7 @@ class Header extends Component {
 
   render() {
     return (
-      <Navbar bg="light" fixed="top" style={{ height: 60 }} expand="sm">
+      <Navbar className="bg-light" fixed="top" expand="sm">
         <Navbar.Brand className="ml-5">
           <Link
             to="/"
@@ -36,21 +40,36 @@ class Header extends Component {
           </Link>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
         <Navbar.Collapse id="basic-navbar-nav">
-          {(this.props.auth.isAuthenticated === false) ?
-            (<Nav className="ml-auto">
-              <Nav.Item bsPrefix="ml-auto">
-                <Nav.Link href="/login">Login</Nav.Link>
-              </Nav.Item>
-              <Nav.Item bsPrefix="ml-auto">
-                <Nav.Link href="/register">Sign Up</Nav.Link>
-              </Nav.Item>
-            </Nav>) :
-            (<Nav className="ml-auto div-hover--pointer" onClick={this.logout}>
-              <Nav.Item bsPrefix="ml-auto">
-                Logout
-              </Nav.Item>
-            </Nav>)
+          {(this.props.auth.isAuthenticated === false)
+            ? (
+              <Nav className="ml-auto">
+                <Nav.Item bsPrefix="ml-auto">
+                  <Nav.Link href="/login">Login</Nav.Link>
+                </Nav.Item>
+                <Nav.Item bsPrefix="ml-auto">
+                  <Nav.Link href="/register">Sign Up</Nav.Link>
+                </Nav.Item>
+              </Nav>
+            )
+
+            : (
+              <Nav className="ml-auto div-hover--pointer">
+                <Nav.Item
+                  onClick={() => this.props.history.push('/me')}
+                  className="p-2 ml-auto"
+                >
+                  Profile
+                </Nav.Item>
+                <hr className='ml-auto my-0 mr-0 p-0' style={{ width: '90px' }} />
+                <Nav.Item
+                  bsPrefix="p-2 ml-auto"
+                  onClick={this.logout}>
+                  Logout
+                  </Nav.Item>
+              </Nav>
+            )
           }
           {/* 
           align this element to the end of the current panel

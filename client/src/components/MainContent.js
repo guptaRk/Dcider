@@ -10,6 +10,7 @@ import Room from './room';
 import PollItem from './pollItem';
 import Landing from './Landing';
 import Profile from './Profile';
+import Help from './Help';
 
 class MainContent extends React.Component {
   render() {
@@ -23,6 +24,7 @@ class MainContent extends React.Component {
           <PrivateRoute path="/xlist" component={XList} />
           <PrivateRoute path="/room" component={Room} />
           <PrivateRoute path="/poll-item" component={PollItem} />
+          <Route path="/help" component={Help} />
           <Route component={NoMatch} />
         </Switch>
       </div>

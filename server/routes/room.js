@@ -219,13 +219,15 @@ router.delete('/:name', auth, (req, res) => {
 */
 router.get('/:type/:name/', auth, (req, res) => {
   // check the emaroomil in the request body
+  /*
   if (!validateUId(req.params.uid))
     return res.status(400).json({ uid: 'not a valid user-id' });
+  */
 
   const roomPromise =
     req.params.type === 'my'
-      ? Room.find({ owner: req.user.uid, name: req.params.name })
-      : Room.find({
+      ? Room.findOne({ owner: req.user.uid, name: req.params.name })
+      : Room.findOne({
         owner: req.params.type,
         xlist: req.user.email,
         name: req.params.name
@@ -233,26 +235,38 @@ router.get('/:type/:name/', auth, (req, res) => {
 
   roomPromise
     .then(room => {
-      if (!room.length)
+      if (!room)
         return res.status(400).json({ room: "Room doesn't exists!" });
 
-      const filteredPolls = room[0].polls.map(x => {
+      const filteredPolls = room.polls.map(x => {
         return {
           givenBy: x.givenBy,
           lastUpdated: x.lastUpdated
         };
       });
 
+      const pollItem = room.pollItem;
+      const hasUserPolled = room.polls.filter(x => x.givenBy === req.user.uid);
+      if (hasUserPolled.length) {
+        // return to the use his(or her) own poll here
+        // map the poll-item accoding to the poll given by user
+        const valuesMapp = [];
+        for (let i = 0; i < pollItem.keys.length; i += 1)
+          valuesMapp.push(pollItem.values[hasUserPolled[0].ordering[i]]);
+
+        pollItem.values = valuesMapp;
+      }
+
       return res.json({
-        owner: room[0].owner,
-        members: room[0].xlist,
-        name: room[0].name,
-        description: room[0].description,
-        pollItem: room[0].pollItem,
-        status: room[0].status,
+        owner: room.owner,
+        members: room.xlist,
+        name: room.name,
+        description: room.description,
+        pollItem,
+        status: room.status,
         usersPolled: filteredPolls,
-        result: room[0].result,
-        lastUpdated: room[0].lastUpdated
+        result: room.result,
+        lastUpdated: room.lastUpdated
       });
     })
     .catch(err => {
@@ -334,7 +348,7 @@ router.post('/:action/member/:room', auth, (req, res) => {
         room[0].xlist.push(req.body.email);
       } else {
         // If there exist a user to remove or not
-        if (!room[0].xlist.includes(req.body.emaiothersl)) {
+        if (!room[0].xlist.includes(req.body.email)) {
           res.status(400).json({ user: 'no user to delete' });
           return null;
         }
@@ -520,6 +534,8 @@ router.post('/:room/poll', auth, (req, res) => {
         room[0].cntValues[seq[i]][i] += 1;
       }
 
+      console.log(room[0].cntKeys, room[0].cntValues);
+
       room[0].lastUpdated = Date.now();
       // Insert the current poll
       room[0].polls.push(poll);
@@ -532,7 +548,19 @@ router.post('/:room/poll', auth, (req, res) => {
     .then(result => {
       // whether the response is already sent?
       if (!result) return;
-      res.send(result);
+      // res.send(result);
+
+      // arrange the values according to the keys and send them
+      const values = [];
+      for (let i = 0; i < req.body.order.length; i += 1)
+        values.push([
+          result.pollItem.values[req.body.order[i]]
+        ]);
+
+      res.json({
+        keys: result.pollItem.keys,
+        values
+      });
     })
     .catch(err => {
       return res.status(500).send(err);
@@ -545,6 +573,8 @@ router.post('/:room/poll', auth, (req, res) => {
   @access   private
 */
 router.get('/:owner/:name/result', auth, (req, res) => {
+  const result = [];
+
   Room.findOne({
     owner: req.params.owner,
     name: req.params.name,
@@ -627,10 +657,16 @@ router.get('/:owner/:name/result', auth, (req, res) => {
           rejected.push(new_rejection_list[i]);
       }
 
-      let final_key_mapping = [];
+      const final_key_mapping = [];
       for (let i = 0; i < matching.length; i += 1) final_key_mapping.push(-1);
       for (let i = 0; i < matching.length; i += 1)
         final_key_mapping[matching[i]] = i;
+
+      for (let i = 0; i < matching.length; i++)
+        result.push([
+          room.pollItem.keys[i],
+          room.pollItem.values[final_key_mapping[i]]
+        ]);
 
       return Room.findByIdAndUpdate(
         room._id,
@@ -638,12 +674,12 @@ router.get('/:owner/:name/result', auth, (req, res) => {
         { new: true }
       );
     })
-    .then(result => {
-      if (!result) {
+    .then(updateResult => {
+      if (!updateResult) {
         // if the response is already sent to the client
         return;
       }
-      res.json({ result: result.result });
+      res.json({ result: result });
     })
     .catch(err => {
       res.status(500).send(err);

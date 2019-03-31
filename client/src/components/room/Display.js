@@ -271,6 +271,8 @@ class RoomDisplay extends React.Component {
       valueMapping[this.state.pollItem.values[i]] = i;
     }
 
+    console.log(keyMapping, valueMapping);
+
     const key = [];
     const value = [];
     for (let i = 0; i < n; i += 1) {
@@ -305,7 +307,7 @@ class RoomDisplay extends React.Component {
         owner: this.state.owner,
         order: finalMapping
       })
-      .then(() => {
+      .then(result => {
         if (this.isUnmount) return;
         this.refs.addPollError.innerHTML =
           '<p style="color: green">Successfully recorded</p>';
@@ -314,6 +316,13 @@ class RoomDisplay extends React.Component {
           () => this.setState({ contributeClicked: false }),
           1000
         );
+        // set the polls-according to current user
+        this.setState({
+          pollItem: {
+            keys: result.data.keys,
+            values: result.data.values
+          }
+        });
       })
       .catch(err => {
         if (this.isUnmount) return;
@@ -340,15 +349,8 @@ class RoomDisplay extends React.Component {
       .get(`/room/${this.state.owner}/${this.state.name}/result`)
       .then(result => {
         if (this.isUnmount) return;
-        const ordering = result.data.result;
-        const mapping = [];
-        for (let i = 0; i < this.state.pollItem.keys.length; i += 1)
-          mapping.push([
-            this.state.pollItem.keys[i],
-            this.state.pollItem.values[ordering[i]]
-          ]);
 
-        this.setState({ finalkeyValueResult: mapping });
+        this.setState({ finalkeyValueResult: result.data.result });
       })
       .catch(err => {
         if (this.isUnmount) return;
@@ -383,15 +385,18 @@ class RoomDisplay extends React.Component {
             value={this.state.name}
             onChange={this.onNameChange}
             isInvalid={!this.state.isNameValid}
+            disabled={this.props.auth.uid !== this.state.owner}
           />
 
           <InputGroup.Append>
-            <Button
-              disabled={!this.state.nameChanged}
-              onClick={this.nameChange}
-            >
-              Edit
+            {this.props.auth.uid === this.state.owner &&
+              <Button
+                disabled={!this.state.nameChanged}
+                onClick={this.nameChange}
+              >
+                Edit
             </Button>
+            }
           </InputGroup.Append>
           <Form.Control.Feedback type="invalid">
             Name must starts with a letter and should contains only digits and
@@ -474,7 +479,7 @@ class RoomDisplay extends React.Component {
 
           {this.state.owner === this.props.auth.uid && (
             <Button
-              className="poll-item-add"
+              className="room-poll-item-add"
               variant="outline-primary"
               onClick={this.updatePollItemClicked}
             >
