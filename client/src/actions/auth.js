@@ -26,13 +26,9 @@ export const login = (email, password) => {
   }
 };
 
-export const register = (name, email, password) => {
+export const register = (name, email, password, uid) => {
   return function (dispatch, getState) {
-    server.post('/users/register', {
-      name: name,
-      email: email,
-      password: password
-    })
+    server.post('/users/register', { name, email, password, uid })
       .then(response => {
         // save the session token in the localstorage os client
         localStorage.setItem('x-auth-token', response.headers["x-auth-token"]);

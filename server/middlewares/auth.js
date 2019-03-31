@@ -5,7 +5,8 @@ export default (req, res, next) => {
   if (!authToken)
     return res.status(400).json({ "token": "Token not found" });
 
-  jwt.verify(authToken, 'jwtPrivateKey', function (err, payload) {
+  const jwtPrivateKey = process.env.JWT_PRIVATE_KEY;
+  jwt.verify(authToken, jwtPrivateKey, function (err, payload) {
     if (err) return res.status(400).json({ "token": "Invalid token" });
 
     // decode the token and add the data to the req

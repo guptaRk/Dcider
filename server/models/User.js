@@ -7,99 +7,6 @@ import validateEmail, {
   userName as validateUserName
 } from '../validation/index';
 
-const othersXlistSchema = new mongoose.Schema({
-  owner: {
-    type: String,
-    validate: {
-      validator: validateEmail,
-      message: 'Email is not valid'
-    },
-    required: true
-  },
-  lastUpdated: {
-    type: Date,
-    required: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  xlist: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'xlist'
-  }
-});
-
-const myXlistSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  xlist: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'xlist'
-  }
-});
-
-const pollItemSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  itemCount: {
-    type: Number,
-    required: true,
-    get: v => Math.round(v),
-    set: v => Math.round(v)
-  },
-  pollItem: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'pollItem'
-  }
-});
-
-const ownRoomSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    validate: {
-      validator: validateName,
-      message:
-        "name field is alphanumeric(may contains underscore'_') and must starts with an alphabet"
-    }
-  },
-  room: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'room'
-  }
-});
-
-const otherRoomSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    validate: {
-      validator: validateName,
-      message: "name field is alphanumeric(may contains underscore'_')"
-    }
-  },
-  owner: {
-    type: String,
-    required: true,
-    validate: {
-      validator: validateEmail,
-      message: 'Email is invalid'
-    }
-  },
-  room: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'room'
-  }
-});
-
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -166,12 +73,13 @@ userSchema.methods.getToken = function () {
     uid: this.uid,
     _id: this._id
   };
+  const jwtPrivateKey = process.env.JWT_PRIVATE_KEY;
   const token = jwt.sign(
     {
       data: payload,
       exp: Math.floor(Date.now() / 1000) + 60 * 60 // 1hr of expiry
     },
-    'jwtPrivateKey'
+    jwtPrivateKey
   );
 
   return token;

@@ -1,15 +1,21 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
 import user from './routes/user';
 import xlist from './routes/xlist';
 import room from './routes/room';
 import pollItem from './routes/pollItem';
 
+// Configure environment variables for server
+dotenv.config();
+
 const app = express();
 const Fawn = require('fawn');
 
-mongoose.connect('mongodb://localhost:27017/Dcider', { useNewUrlParser: true })
+const mongodbConnectionString = process.env.MONGO_URI;
+
+mongoose.connect(mongodbConnectionString, { useNewUrlParser: true })
   .then(() => console.log('connected to mongodb..'))
   .catch((err) => {
     console.log('Error while connecting to mongodb : \n', err);
@@ -31,4 +37,6 @@ app.use('/api/xlist', xlist);
 app.use('/api/room', room);
 app.use('/api/pollItem', pollItem);
 
-app.listen(5000, console.log('listening on port 5000...'));
+const port = process.env.port || 5000;
+
+app.listen(port, console.log('listening on port 5000...'));

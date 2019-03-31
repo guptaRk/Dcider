@@ -111,7 +111,7 @@ class Scrollspy extends React.Component {
               </div>) : null)}
               </Link>
 
-              <Link className="menu-item" to="/">
+              {/*<Link className="menu-item" to="/">
                 <div className="menu-item-icon" onClick={this.logout}>
                   <img
                     src={require('../images/logout.png')}
@@ -122,7 +122,7 @@ class Scrollspy extends React.Component {
                 {(open ? (<div className="menu-item-text" onClick={this.logout}>
                   Log Out
                 </div>) : null)}
-              </Link>
+              </Link> */}
             </div>
 
           </ul>
