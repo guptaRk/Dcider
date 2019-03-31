@@ -33,7 +33,7 @@ class XlistCardContainer extends React.Component {
       })
       .catch(err => {
         if (this.isUnmount) return;
-        console.log(err.response);
+        // console.log(err.response);
         if (err.response) {
           const res = err.response;
           if (res.status === 400) {
@@ -62,7 +62,7 @@ class XlistCardContainer extends React.Component {
       .catch(err => {
         if (this.isUnmount) return;
         // TODO: logout the user if token mismatches
-        console.log('refreshing my xlists: ', err.response);
+        // console.log('refreshing my xlists: ', err.response);
       });
   };
 
@@ -78,7 +78,7 @@ class XlistCardContainer extends React.Component {
       })
       .catch(err => {
         if (this.isUnmount) return;
-        console.log('refreshing others list: ', err);
+        // console.log('refreshing others list: ', err);
       });
   };
 
@@ -99,15 +99,15 @@ class XlistCardContainer extends React.Component {
 
         // update the myXlist state
         this.setState(prvState => {
-          prvState.myXlists.filter(x => x.name !== name);
+          prvState.myXlists = prvState.myXlists.filter(x => x.name !== name);
           return {
-            myXlist: { ...prvState.myXlist }
+            myXlists: prvState.myXlists
           };
         });
       })
       .catch(err => {
         if (this.isUnmount) return;
-        console.log('deleting xlist: ', err);
+        // console.log('deleting xlist: ', err);
         if (err.response) {
           alert(err.response.data);
         }
@@ -125,7 +125,7 @@ class XlistCardContainer extends React.Component {
 
     const card = this.clickedInsideCard(e.target);
     if (card) {
-      console.log(card.id);
+      // console.log(card.id);
       const cardNameAndEmail = card.id.split('$$');
       this.setState({
         clickedCardName: cardNameAndEmail[0],
@@ -198,7 +198,7 @@ class XlistCardContainer extends React.Component {
                   title={x.name}
                   type="me"
                   owner={this.props.auth.uid}
-                  lastUpdated={new Date(x.lastUpdated)}
+                  lastUpdated={x.lastUpdated}
                   members={x.members}
                 />
               ))}
@@ -246,7 +246,7 @@ class XlistCardContainer extends React.Component {
                 title={x.name}
                 type="others"
                 owner={x.owner}
-                lastUpdated={new Date(x.lastUpdated)}
+                lastUpdated={x.lastUpdated}
                 members={x.members}
               />
             ))}

@@ -174,7 +174,7 @@ class RoomCardContainer extends React.Component {
     const pollItem = this.refs.roomPollItem.value;
     const name = this.refs.roomName.value;
 
-    console.log(xlist, description, pollItem, name);
+    // console.log(xlist, description, pollItem, name);
 
     server.post('/room/create', { name, description, pollItem, xlist })
       .then((response) => {
@@ -187,7 +187,7 @@ class RoomCardContainer extends React.Component {
         });
       })
       .catch(err => {
-        console.log(err.response);
+        // console.log(err.response);
         if (this.isUnmount) return;
         if (err.response && err.response.data.token) {
           // Token expires or deleted

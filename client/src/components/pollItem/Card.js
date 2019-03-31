@@ -5,7 +5,7 @@ import getTimeDifference from '../../utils/getTimeDifference';
 
 class PollItemCard extends React.Component {
   static propTypes = {
-    lastUpdated: PropTypes.instanceOf(Date).isRequired,
+    lastUpdated: PropTypes.string.isRequired,
     owner: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired
   };

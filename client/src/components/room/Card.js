@@ -69,7 +69,7 @@ class RoomCard extends React.Component {
         </Card.Body>
         <Card.Footer>
           <small className="text-muted">
-            Last updated {getTimeDifference(this.props.lastUpdated)}
+            Last updated {getTimeDifference(new Date(this.props.lastUpdated))}
           </small>
         </Card.Footer>
       </Card>

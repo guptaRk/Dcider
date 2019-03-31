@@ -90,7 +90,7 @@ class RoomDisplay extends React.Component {
           return;
         }
         // other errors
-        console.log(err);
+        // console.log(err);
       });
   };
 
@@ -142,7 +142,7 @@ class RoomDisplay extends React.Component {
           this.props.logout();
           return;
         }
-        console.log(err);
+        // console.log(err);
       });
   };
 
@@ -168,7 +168,7 @@ class RoomDisplay extends React.Component {
             return;
           }
         }
-        console.log(err);
+        // console.log(err);
       });
   };
 
@@ -205,7 +205,7 @@ class RoomDisplay extends React.Component {
       .then(result => {
         if (this.isUnmount) return;
 
-        console.log(result.data.pollItems);
+        // console.log(result.data.pollItems);
         this.setState({
           pollItem: result.data.pollItem,
           addOrRemovePollItemClicked: null
@@ -226,7 +226,7 @@ class RoomDisplay extends React.Component {
           return;
         }
         // Internal server error
-        console.log(err);
+        // console.log(err);
       });
   };
 
@@ -254,7 +254,7 @@ class RoomDisplay extends React.Component {
             return;
           }
           // other errors
-          console.log(err);
+          // console.log(err);
         }
       });
   };
@@ -271,7 +271,7 @@ class RoomDisplay extends React.Component {
       valueMapping[this.state.pollItem.values[i]] = i;
     }
 
-    console.log(keyMapping, valueMapping);
+    // console.log(keyMapping, valueMapping);
 
     const key = [];
     const value = [];
@@ -286,7 +286,7 @@ class RoomDisplay extends React.Component {
     for (let i = 0; i < n; i += 1)
       if (copy[i] !== i) {
         // TODO: Error
-        console.log('key error!');
+        // console.log('key error!');
         break;
       }
 
@@ -295,7 +295,7 @@ class RoomDisplay extends React.Component {
     for (let i = 0; i < n; i += 1)
       if (copy[i] !== i) {
         // TODO: Error
-        console.log('value error!');
+        // console.log('value error!');
         break;
       }
 
@@ -338,7 +338,7 @@ class RoomDisplay extends React.Component {
             return;
           }
           // other errors are not because of client side part
-          console.log(err.response);
+          // console.log(err.response);
         }
       });
   };
@@ -361,7 +361,7 @@ class RoomDisplay extends React.Component {
             return;
           }
           // other errors are not because of client side part
-          console.log(err.response);
+          // console.log(err.response);
         }
       });
 
@@ -369,7 +369,7 @@ class RoomDisplay extends React.Component {
   };
 
   render() {
-    console.log(this.state.owner, this.props.auth.uid);
+    // console.log(this.state.owner, this.props.auth.uid);
 
     const { keys, values } = this.state.pollItem;
     const keyValuePairs = [];
@@ -476,16 +476,6 @@ class RoomDisplay extends React.Component {
           <Button variant="outline-dark" onClick={this.usersPolledClicked}>
             Users Polled
           </Button>
-
-          {this.state.owner === this.props.auth.uid && (
-            <Button
-              className="room-poll-item-add"
-              variant="outline-primary"
-              onClick={this.updatePollItemClicked}
-            >
-              <FaPlus style={{ margin: 'auto' }} />
-            </Button>
-          )}
 
           <Button
             className="ml-auto"
@@ -695,13 +685,24 @@ class RoomDisplay extends React.Component {
         </div>
 
         {/* For adding a poll in the current room */}
-        <div className="mt-auto ml-auto mr-auto">
+        <div className="mt-auto d-flex flex-row">
+          {this.state.owner === this.props.auth.uid && (
+            <Button
+              variant="outline-primary"
+              onClick={this.updatePollItemClicked}
+            >
+              Add Poll-Items
+            </Button>
+          )}
+
           <Button
+            className={(this.state.owner === this.props.auth.uid)
+              ? "ml-auto" : "ml-auto mr-auto"}
             variant="outline-primary"
             onClick={() => this.setState({ contributeClicked: true })}
             disabled={this.state.status === 'closed'}
           >
-            Want to contribute?
+            Poll Here
           </Button>
 
           <VerticallyCentredModal

@@ -295,7 +295,7 @@ class XlistDisplay extends React.Component {
               placeholder="X-List name"
             />
             {this.props.match.params.type === 'me' && (
-              <InputGroup.Append className="col-2">
+              <InputGroup.Append>
                 <Button
                   variant="outline-primary"
                   disabled={!this.state.nameChanged}

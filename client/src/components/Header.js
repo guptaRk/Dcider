@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 import '../App.css';
-import { withRouter, Link, Redirect } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { logout } from '../actions/auth';
@@ -15,10 +15,6 @@ class Header extends Component {
   state = {
     profileClicked: false
   };
-
-  menu_click(e) {
-    console.log(e);
-  }
 
   logout(e) {
     e.preventDefault();

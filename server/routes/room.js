@@ -139,7 +139,8 @@ router.get('/my/all/:status', auth, (req, res) => {
           usersPolled: x.polls.length,
           pollItemCount: x.pollItem.keys.length,
           membersCount: x.xlist.length,
-          lastUpdated: x.lastUpdated
+          lastUpdated: x.lastUpdated,
+          owner: x.owner
         };
       });
       return res.json(filteredData);
