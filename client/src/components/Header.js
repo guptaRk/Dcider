@@ -62,7 +62,6 @@ class Header extends Component {
                 >
                   Profile
                 </Nav.Item>
-                <hr className='ml-auto my-0 mr-0 p-0' style={{ width: '90px' }} />
                 <Nav.Item
                   bsPrefix="p-2 ml-auto"
                   onClick={this.logout}>
