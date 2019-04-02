@@ -581,7 +581,10 @@ class RoomDisplay extends React.Component {
                   </Button>
                   <Button
                     onClick={() =>
-                      this.setState({ addOrRemovePollItemClicked: null })
+                      this.setState({
+                        addOrRemovePollItemClicked: null,
+                        addOrRemovePollItemError: null
+                      })
                     }
                     variant="outline-dark"
                   >
@@ -736,7 +739,7 @@ class RoomDisplay extends React.Component {
                             <DropdownButton
                               as={InputGroup.Append}
                               variant="outline-secondary"
-                              title="select"
+                              title=""
                             >
                               {this.state.pollItem.keys.map(cur => (
                                 <Dropdown.Item
@@ -763,7 +766,7 @@ class RoomDisplay extends React.Component {
                               alignRight
                               as={InputGroup.Append}
                               variant="outline-secondary"
-                              title="select"
+                              title=""
                             >
                               {this.state.pollItem.values.map(cur => (
                                 <Dropdown.Item
