@@ -1,28 +1,27 @@
-import React, { Component } from 'react';
-import Header from './components/Header';
-import Scrollspy from './components/SideNavigation';
-import MainContent from './components/MainContent';
-import Footer from './components/Footer';
+import React, { Component } from "react";
+import Header from "./components/Header";
+import Scrollspy from "./components/SideNavigation";
+import MainContent from "./components/MainContent";
+// import Footer from './components/Footer';
 
-import { connect } from 'react-redux';
-import toggle_menu from './actions/toggle_menu';
-import { withRouter } from 'react-router';
+import { connect } from "react-redux";
+import toggle_menu from "./actions/toggle_menu";
+import { withRouter } from "react-router";
 
-import { successfulLogin } from './actions/auth';
-import store from './store';
+import { successfulLogin } from "./actions/auth";
+import store from "./store";
 
-import jwt_decode from 'jwt-decode';
+import jwt_decode from "jwt-decode";
 
-if (localStorage.getItem('x-auth-token')) {
-  const payload = jwt_decode(localStorage.getItem('x-auth-token'));
+if (localStorage.getItem("x-auth-token")) {
+  const payload = jwt_decode(localStorage.getItem("x-auth-token"));
   //console.log("app: ", payload);
   store.dispatch(successfulLogin(payload.data));
 }
 
 class App extends Component {
-
-  eventListenerAction = (e) => {
-    const body = document.querySelector('body');
+  eventListenerAction = e => {
+    const body = document.querySelector("body");
 
     if (window.innerWidth < 800 && this.props.menu_disp === true)
       this.props.toggle_menu();
@@ -30,45 +29,48 @@ class App extends Component {
       this.props.toggle_menu();
 
     if (window.innerWidth <= 576)
-      body.style.width = (250 * (this.props.menu_disp ? 1 : 0)) + window.innerWidth + 'px';
-    else body.style.width = '100%';
-
+      body.style.width =
+        250 * (this.props.menu_disp ? 1 : 0) + window.innerWidth + "px";
+    else body.style.width = "100%";
   };
 
   componentDidMount() {
     if (this.props.menu_disp === false && window.innerWidth >= 800)
       this.props.toggle_menu();
 
-    const body = document.querySelector('body');
+    const body = document.querySelector("body");
 
     if (window.innerWidth <= 576)
-      body.style.width = (250 * (this.props.menu_disp ? 1 : 0)) + window.innerWidth + 'px';
-    else body.style.width = '100%';
+      body.style.width =
+        250 * (this.props.menu_disp ? 1 : 0) + window.innerWidth + "px";
+    else body.style.width = "100%";
 
-    window.addEventListener('resize', this.eventListenerAction);
+    window.addEventListener("resize", this.eventListenerAction);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.eventListenerAction);
+    window.removeEventListener("resize", this.eventListenerAction);
   }
 
   render() {
     if (
-      process.env.NODE_ENV === 'production' &&
-      window.location.href.includes('http://')
+      process.env.NODE_ENV === "production" &&
+      window.location.href.includes("http://")
     ) {
-      const url = `https://${window.location.href.split('http://')[1]}`;
+      const url = `https://${window.location.href.split("http://")[1]}`;
       window.location.href = url;
     }
 
     return (
       <div
-        className={"d-flex flex-column h-100 " +
-          ((this.props.menu_disp === true) ?
-            "main-content-with-menu-open " :
-            "main-content-with-menu-closed "
-          ) + ((this.props.auth.isAuthenticated) ? "" : "not-logged-in")}>
-
+        className={
+          "d-flex flex-column h-100 " +
+          (this.props.menu_disp === true
+            ? "main-content-with-menu-open "
+            : "main-content-with-menu-closed ") +
+          (this.props.auth.isAuthenticated ? "" : "not-logged-in")
+        }
+      >
         {/*Above classes will not affect Header and Scrollspy components as their position is fixed*/}
         <Header />
         {this.props.auth.isAuthenticated && <Scrollspy />}
@@ -76,21 +78,20 @@ class App extends Component {
         <MainContent />
 
         {/* <Footer /> */}
-      </div >
-
+      </div>
     );
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     menu_disp: state.toggle_menu,
     auth: state.auth
   };
-}
+};
 
 // used withRouter as we have Routes inside some of the component (MainContent) so we have to pass the props (match, history and location)
-// If we have rendered the <Route> here then we need not to do this 
+// If we have rendered the <Route> here then we need not to do this
 
 /*
   <BrowserRouter>
@@ -106,4 +107,9 @@ const mapStateToProps = (state) => {
   </BrowserRouter>
 */
 
-export default withRouter(connect(mapStateToProps, { toggle_menu })(App));
+export default withRouter(
+  connect(
+    mapStateToProps,
+    { toggle_menu }
+  )(App)
+);

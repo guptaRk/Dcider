@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 
-import NoMatch from './NoMatch';
-import Login from './Login';
-import Register from './Register';
-import { Switch, Route } from 'react-router';
-import PrivateRoute from './common/PrivateRoute';
-import XList from './xlist/index';
-import Room from './room';
-import PollItem from './pollItem';
-import Landing from './Landing';
-import Profile from './Profile';
-import Help from './Help';
+import NoMatch from "./NoMatch";
+import Login from "./Login";
+import Register from "./Register";
+import { Switch, Route } from "react-router";
+import PrivateRoute from "./common/PrivateRoute";
+import XList from "./xlist/index";
+import Room from "./room";
+import PollItem from "./pollItem";
+import Landing from "./Landing";
+import Profile from "./Profile";
+import Help from "./help";
 
 class MainContent extends React.Component {
   render() {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   InputGroup,
   Form,
@@ -8,30 +8,29 @@ import {
   DropdownButton,
   Dropdown,
   FormControl
-} from 'react-bootstrap';
-import { FaPlus } from 'react-icons/fa';
-import { connect } from 'react-redux';
+} from "react-bootstrap";
+import { connect } from "react-redux";
 
-import server from '../../Axios';
-import { logout } from '../../actions/auth';
-import VerticallyCentredModal from '../common/VerticallyCentredModal';
-import getTimeDifference from '../../utils/getTimeDifference';
-import './index.css';
+import server from "../../Axios";
+import { logout } from "../../actions/auth";
+import VerticallyCentredModal from "../common/VerticallyCentredModal";
+import getTimeDifference from "../../utils/getTimeDifference";
+import "./index.css";
 
 class RoomDisplay extends React.Component {
   isUnmount = false;
 
   state = {
     // the things returned from the server directly
-    owner: '',
+    owner: "",
     members: [],
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     pollItem: {
       keys: [],
       values: []
     },
-    status: 'closed',
+    status: "closed",
     usersPolled: [],
     result: [],
     lastUpdated: Date.now(),
@@ -131,7 +130,7 @@ class RoomDisplay extends React.Component {
         if (this.isUnmount) return;
         this.setState(prvState => {
           return {
-            status: prvState.status === 'active' ? 'closed' : 'active'
+            status: prvState.status === "active" ? "closed" : "active"
           };
         });
       })
@@ -148,7 +147,7 @@ class RoomDisplay extends React.Component {
 
   deleteMember = evt => {
     const element = evt.target;
-    if (!element.classList.contains('deleteMember')) return;
+    if (!element.classList.contains("deleteMember")) return;
     server
       .post(`/room/remove/member/${this.state.name}`, { email: element.id })
       .then(() => {
@@ -196,7 +195,7 @@ class RoomDisplay extends React.Component {
 
     // sends the request to the server to add or remove the poll-item
     const requestString =
-      this.state.addOrRemovePollItemClicked === 'Add'
+      this.state.addOrRemovePollItemClicked === "Add"
         ? `/room/add/pollItem/${this.state.name}`
         : `/room/remove/pollItem/${this.state.name}`;
 
@@ -344,7 +343,7 @@ class RoomDisplay extends React.Component {
   };
 
   resultClicked = () => {
-    if (this.state.status === 'active') return;
+    if (this.state.status === "active") return;
     server
       .get(`/room/${this.state.owner}/${this.state.name}/result`)
       .then(result => {
@@ -389,14 +388,14 @@ class RoomDisplay extends React.Component {
           />
 
           <InputGroup.Append>
-            {this.props.auth.uid === this.state.owner &&
+            {this.props.auth.uid === this.state.owner && (
               <Button
                 disabled={!this.state.nameChanged}
                 onClick={this.nameChange}
               >
                 Edit
-            </Button>
-            }
+              </Button>
+            )}
           </InputGroup.Append>
           <Form.Control.Feedback type="invalid">
             Name must starts with a letter and should contains only digits and
@@ -408,7 +407,7 @@ class RoomDisplay extends React.Component {
 
         <div className="d-flex flex-row">
           <Button
-            disabled={this.state.status === 'active'}
+            disabled={this.state.status === "active"}
             variant="outline-info"
             className="mb-2"
             onClick={this.resultClicked}
@@ -418,15 +417,15 @@ class RoomDisplay extends React.Component {
 
           <Button
             variant={
-              this.state.status === 'active'
-                ? 'outline-danger'
-                : 'outline-success'
+              this.state.status === "active"
+                ? "outline-danger"
+                : "outline-success"
             }
             className="ml-auto mb-2"
             onClick={this.toggleStatus}
             disabled={this.state.owner !== this.props.auth.uid}
           >
-            {this.state.status === 'active' ? 'close it' : 'open it'}
+            {this.state.status === "active" ? "close it" : "open it"}
           </Button>
         </div>
 
@@ -540,7 +539,7 @@ class RoomDisplay extends React.Component {
                 <Button
                   variant="outline-info"
                   onClick={() =>
-                    this.setState({ addOrRemovePollItemClicked: 'Add' })
+                    this.setState({ addOrRemovePollItemClicked: "Add" })
                   }
                 >
                   Add
@@ -549,7 +548,7 @@ class RoomDisplay extends React.Component {
                   className="ml-auto"
                   variant="outline-danger"
                   onClick={() =>
-                    this.setState({ addOrRemovePollItemClicked: 'Remove' })
+                    this.setState({ addOrRemovePollItemClicked: "Remove" })
                   }
                 >
                   Delete
@@ -627,10 +626,10 @@ class RoomDisplay extends React.Component {
                         id={`${cur}`}
                         type="button"
                         style={{
-                          cursor: 'pointer',
-                          border: 'none',
-                          color: 'inherit',
-                          background: 'none'
+                          cursor: "pointer",
+                          border: "none",
+                          color: "inherit",
+                          background: "none"
                         }}
                       >
                         x
@@ -647,41 +646,41 @@ class RoomDisplay extends React.Component {
                   <Button
                     variant="outline-success"
                     className="ml-auto mt-3"
-                    style={{ borderRadius: '50px' }}
+                    style={{ borderRadius: "50px" }}
                     onClick={() => this.setState({ addUserClicked: true })}
                   >
                     +
                   </Button>
                 ) : (
-                    <InputGroup className="mt-3">
-                      <Form.Control
-                        placeholder="user's email"
-                        ref="addUserField"
-                        type="text"
-                        isInvalid={this.state.userError ? true : false}
-                      />
-                      <InputGroup.Append>
-                        <Button
-                          variant="outline-success"
-                          onClick={this.addMember}
-                        >
-                          Add
+                  <InputGroup className="mt-3">
+                    <Form.Control
+                      placeholder="user's email"
+                      ref="addUserField"
+                      type="text"
+                      isInvalid={this.state.userError ? true : false}
+                    />
+                    <InputGroup.Append>
+                      <Button
+                        variant="outline-success"
+                        onClick={this.addMember}
+                      >
+                        Add
                       </Button>
-                      </InputGroup.Append>
-                      <InputGroup.Append>
-                        <Button
-                          variant="outline-warning"
-                          onClick={() => this.setState({ addUserClicked: false })}
-                        >
-                          Cancel
+                    </InputGroup.Append>
+                    <InputGroup.Append>
+                      <Button
+                        variant="outline-warning"
+                        onClick={() => this.setState({ addUserClicked: false })}
+                      >
+                        Cancel
                       </Button>
-                      </InputGroup.Append>
+                    </InputGroup.Append>
 
-                      <Form.Control.Feedback type="invalid">
-                        {this.state.userError}
-                      </Form.Control.Feedback>
-                    </InputGroup>
-                  )}
+                    <Form.Control.Feedback type="invalid">
+                      {this.state.userError}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                )}
               </div>
             )}
           </VerticallyCentredModal>
@@ -699,11 +698,14 @@ class RoomDisplay extends React.Component {
           )}
 
           <Button
-            className={(this.state.owner === this.props.auth.uid)
-              ? "ml-auto" : "ml-auto mr-auto"}
+            className={
+              this.state.owner === this.props.auth.uid
+                ? "ml-auto"
+                : "ml-auto mr-auto"
+            }
             variant="outline-primary"
             onClick={() => this.setState({ contributeClicked: true })}
-            disabled={this.state.status === 'closed'}
+            disabled={this.state.status === "closed"}
           >
             Poll Here
           </Button>
