@@ -4,7 +4,7 @@ import { Alert, ListGroup } from "react-bootstrap";
 class XList extends React.Component {
   render() {
     return (
-      <div className="mt-3">
+      <div className="mt-3 p-2">
         <Alert variant="info">X-Lists</Alert>
         <div className="bg-light p-4">
           <ListGroup className="mt-3">

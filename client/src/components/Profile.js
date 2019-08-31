@@ -1,9 +1,9 @@
-import React from 'react';
-import { Card, Button, Form, Row } from 'react-bootstrap';
-import { connect } from 'react-redux';
+import React from "react";
+import { Card, Button, Form, Row } from "react-bootstrap";
+import { connect } from "react-redux";
 
-import VerticallyCentredModal from './common/VerticallyCentredModal';
-import server from '../Axios';
+import VerticallyCentredModal from "./common/VerticallyCentredModal";
+import server from "../Axios";
 
 class Profile extends React.Component {
   isUnmount = false;
@@ -22,15 +22,20 @@ class Profile extends React.Component {
 
     const oldPass = this.refs.oldPass.value;
     const newPass = this.refs.newPass.value;
-    server.post('/users/password-change', { oldPass, newPass })
+    server
+      .post("/users/password-change", { oldPass, newPass })
       .then(result => {
         if (this.isUnmount) return;
         this.refs.textSuccess.innerHTML = result.data.result;
 
-        window.setTimeout(() => this.setState({
-          changePasswordClicked: false,
-          passwordError: null
-        }), 1000);
+        window.setTimeout(
+          () =>
+            this.setState({
+              changePasswordClicked: false,
+              passwordError: null
+            }),
+          1000
+        );
       })
       .catch(err => {
         if (this.isUnmount) return;
@@ -49,7 +54,7 @@ class Profile extends React.Component {
           console.log(err);
         }
       });
-  }
+  };
 
   render() {
     return (
@@ -64,27 +69,32 @@ class Profile extends React.Component {
             <Button
               className="ml-auto mr-auto"
               variant="outline-info"
-              onClick={() => this.setState({ changePasswordClicked: true })}>
+              onClick={() => this.setState({ changePasswordClicked: true })}
+            >
               Change Password
             </Button>
 
             <VerticallyCentredModal
               heading="Change your password"
               show={this.state.changePasswordClicked}
-              onHide={() => this.setState({ changePasswordClicked: false, passwordError: null })}>
-
+              onHide={() =>
+                this.setState({
+                  changePasswordClicked: false,
+                  passwordError: null
+                })
+              }
+            >
               <Form className="d-flex flex-column">
                 <Form.Group as={Row}>
-                  <Form.Label className="col-sm-3">
-                    Old Password
-                  </Form.Label>
+                  <Form.Label className="col-sm-3">Old Password</Form.Label>
 
                   <div className="col-sm-9">
                     <Form.Control
                       type="password"
                       ref="oldPass"
                       placeholder="Old password"
-                      isInvalid={(this.state.passwordError) ? true : false} />
+                      isInvalid={this.state.passwordError ? true : false}
+                    />
                     <Form.Control.Feedback type="invalid">
                       {this.state.passwordError}
                     </Form.Control.Feedback>
@@ -92,21 +102,19 @@ class Profile extends React.Component {
                 </Form.Group>
 
                 <Form.Group as={Row}>
-                  <Form.Label className="col-sm-3">
-                    New Password
-                  </Form.Label>
+                  <Form.Label className="col-sm-3">New Password</Form.Label>
 
                   <div className="col-sm-9">
                     <Form.Control
                       type="password"
                       ref="newPass"
                       placeholder="New password"
-                      isInvalid={(this.state.passwordError) ? true : false} />
+                      isInvalid={this.state.passwordError ? true : false}
+                    />
                     <Form.Control.Feedback type="invalid">
                       {this.state.passwordError}
                     </Form.Control.Feedback>
                   </div>
-
                 </Form.Group>
 
                 <small className="text-success" ref="textSuccess" />
@@ -114,11 +122,11 @@ class Profile extends React.Component {
                   type="submit"
                   variant="outline-success"
                   className="ml-auto mr-auto"
-                  onClick={this.onPasswordChange}>
+                  onClick={this.onPasswordChange}
+                >
                   Change
                 </Button>
               </Form>
-
             </VerticallyCentredModal>
           </Card.Body>
         </Card>

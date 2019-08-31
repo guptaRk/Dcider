@@ -4,7 +4,7 @@ import { Alert, ListGroup } from "react-bootstrap";
 class Room extends React.Component {
   render() {
     return (
-      <div className="mt-3">
+      <div className="mt-3 p-2">
         <Alert variant="info">Rooms</Alert>
         <div className="bg-light p-4">
           <b>

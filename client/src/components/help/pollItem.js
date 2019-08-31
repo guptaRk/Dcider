@@ -4,7 +4,7 @@ import { Alert, ListGroup } from "react-bootstrap";
 class PollItems extends React.Component {
   render() {
     return (
-      <div className="mt-3">
+      <div className="mt-3 p-2">
         <Alert variant="info">Poll-Items</Alert>
         <div className="bg-light p-4">
           <ListGroup className="mt-3">

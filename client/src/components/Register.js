@@ -1,12 +1,11 @@
-import React from 'react';
-import { Form, Row, Button } from 'react-bootstrap';
-import { Link, Redirect } from 'react-router-dom';
+import React from "react";
+import { Form, Row, Button } from "react-bootstrap";
+import { Link, Redirect } from "react-router-dom";
 
-import { register, authError } from '../actions/auth';
-import { connect } from 'react-redux';
+import { register, authError } from "../actions/auth";
+import { connect } from "react-redux";
 
 class Register extends React.Component {
-
   constructor(props) {
     super(props);
     this.onLogin = this.onLogin.bind(this);
@@ -22,7 +21,7 @@ class Register extends React.Component {
     const password2 = this.refs.password2.value;
 
     if (password !== password2) {
-      this.props.authError({ "password2": "password doesn't match" });
+      this.props.authError({ password2: "password doesn't match" });
       return;
     }
     this.props.register(name, email, password, uid);
@@ -31,77 +30,69 @@ class Register extends React.Component {
   render() {
     const { error, isAuthenticated } = this.props.auth;
 
-    if (isAuthenticated) return <Redirect to="/me" />
+    if (isAuthenticated) return <Redirect to="/me" />;
 
     return (
-      <div className="border border-light m-auto p-4">
+      <div className="m-auto p-3 bg-light">
         <Form noValidate>
-
           <Form.Group as={Row}>
-            <Form.Label className="col-sm-3">
-              Name
-            </Form.Label>
+            <Form.Label className="col-sm-3">Name</Form.Label>
 
             <div className="col-sm-9">
               <Form.Control
                 type="text"
                 ref="name"
                 placeholder="your name"
-                isInvalid={error.name ? true : false} />
+                isInvalid={error.name ? true : false}
+              />
               <Form.Control.Feedback type="invalid">
                 {error.name}
               </Form.Control.Feedback>
             </div>
-
           </Form.Group>
 
           <Form.Group as={Row}>
-            <Form.Label className="col-sm-3">
-              User-Handle
-            </Form.Label>
+            <Form.Label className="col-sm-3">User-Handle</Form.Label>
 
             <div className="col-sm-9">
               <Form.Control
                 type="text"
                 ref="uid"
                 placeholder="your_handle"
-                isInvalid={(error.uid) ? true : false} />
+                isInvalid={error.uid ? true : false}
+              />
               <Form.Control.Feedback type="invalid">
                 {error.uid}
               </Form.Control.Feedback>
             </div>
-
           </Form.Group>
 
           <Form.Group as={Row}>
-            <Form.Label className="col-sm-3">
-              Email
-            </Form.Label>
+            <Form.Label className="col-sm-3">Email</Form.Label>
 
             <div className="col-sm-9">
               <Form.Control
                 type="text"
                 ref="email"
                 placeholder="email@example.com"
-                isInvalid={error.email ? true : false} />
+                isInvalid={error.email ? true : false}
+              />
               <Form.Control.Feedback type="invalid">
                 {error.email}
               </Form.Control.Feedback>
             </div>
-
           </Form.Group>
 
           <Form.Group as={Row}>
-            <Form.Label className="col-sm-3">
-              Password
-            </Form.Label>
+            <Form.Label className="col-sm-3">Password</Form.Label>
 
             <div className="col-sm-9">
               <Form.Control
                 type="password"
                 ref="password"
                 placeholder="password here"
-                isInvalid={error.password ? true : false} />
+                isInvalid={error.password ? true : false}
+              />
               <Form.Control.Feedback type="invalid">
                 {error.password}
               </Form.Control.Feedback>
@@ -109,16 +100,15 @@ class Register extends React.Component {
           </Form.Group>
 
           <Form.Group as={Row}>
-            <Form.Label className="col-sm-3">
-              Retype Password
-            </Form.Label>
+            <Form.Label className="col-sm-3">Retype Password</Form.Label>
 
             <div className="col-sm-9">
               <Form.Control
                 type="password"
                 ref="password2"
                 placeholder="retype same passowrd"
-                isInvalid={error.password2 ? true : false} />
+                isInvalid={error.password2 ? true : false}
+              />
               <Form.Control.Feedback type="invalid">
                 {error.password2}
               </Form.Control.Feedback>
@@ -130,12 +120,11 @@ class Register extends React.Component {
               onClick={this.onLogin}
               className="m-2"
               type="submit"
-              variant="outline-success">
+              variant="outline-success"
+            >
               Register
-          </Button>
-            <Link
-              to="/login"
-              className="m-2">
+            </Button>
+            <Link to="/login" className="m-2">
               <Button variant="outline-info">Already Registered?</Button>
             </Link>
           </div>
@@ -145,10 +134,13 @@ class Register extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     auth: state.auth
-  }
-}
+  };
+};
 
-export default connect(mapStateToProps, { register, authError })(Register);
+export default connect(
+  mapStateToProps,
+  { register, authError }
+)(Register);

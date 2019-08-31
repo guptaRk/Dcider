@@ -1,10 +1,10 @@
-import React from 'react';
-import '../App.css';
-import { Link, withRouter } from 'react-router-dom';
+import React from "react";
+import "../App.css";
+import { Link, withRouter } from "react-router-dom";
 
-import { connect } from 'react-redux';
-import toggle_menu from '../actions/toggle_menu';
-import { logout } from '../actions/auth';
+import { connect } from "react-redux";
+import toggle_menu from "../actions/toggle_menu";
+import { logout } from "../actions/auth";
 
 class Scrollspy extends React.Component {
   constructor(props) {
@@ -15,7 +15,7 @@ class Scrollspy extends React.Component {
   logout(e) {
     e.preventDefault();
     this.props.logout();
-    this.props.history.push('/login');
+    this.props.history.push("/login");
   }
 
   /*
@@ -23,7 +23,7 @@ class Scrollspy extends React.Component {
   */
   menu_toggle = () => {
     this.props.toggle_menu();
-  }
+  };
 
   render() {
     const open = this.props.menu_disp;
@@ -41,77 +41,83 @@ class Scrollspy extends React.Component {
           onClick={this.menu_toggle}
         />
 
-
-        <div
-          className={"sideNav bg-light " +
-            ((this.props.menu_disp === true) ?
-              "sideNav--show" : "sideNav--hide")}
-          ref="sideNav">
-
-          {/* marginTop is set to the heght of the header
+        {open ? (
+          <div
+            className={
+              "sideNav bg-light " +
+              (this.props.menu_disp === true
+                ? "sideNav--show"
+                : "sideNav--hide")
+            }
+            ref="sideNav"
+          >
+            {/* marginTop is set to the heght of the header
           so that the items don't get hide beneath header */}
-          <ul
-            className="menu d-flex flex-column h-100"
-            style={{ paddingTop: "60px" }}>
 
-            <Link className="menu-item" to="/room">
-              <div className="menu-item-icon">
-                <img
-                  src={require('../images/r.png')}
-                  width="50px"
-                  alt="notes"
-                  height="50px" />
-              </div>
-              {(open ? (<div className="menu-item-text">
-                Rooms
-              </div>) : null)}
-            </Link>
-
-            <Link className="menu-item" to="/xlist">
-              <div className="menu-item-icon">
-                <img
-                  src={require('../images/x.png')}
-                  width="50px"
-                  alt="notes"
-                  height="50px" />
-              </div>
-              {(open ? (<div className="menu-item-text">
-                X-List
-              </div>) : null)}
-            </Link>
-
-            <Link className="menu-item" to="/poll-item">
-              <div className="menu-item-icon">
-                <img
-                  src={require('../images/p.png')}
-                  width="50px"
-                  alt="notes"
-                  height="50px" />
-              </div>
-              {(open ? (<div className="menu-item-text">
-                Poll-Items
-              </div>) : null)}
-            </Link>
-
-            <div
-              className="d-flex flex-column"
-              style={{ "marginTop": "auto" }}>
-              <hr width="50px" />
-
-              <Link className="menu-item" to="/help">
-                <div className="menu-item-icon">
-                  <img
-                    src={require('../images/help.png')}
-                    width="50px"
-                    alt="notes"
-                    height="50px" />
+            <ul
+              className="menu d-flex flex-column h-100"
+              style={{ paddingTop: "60px" }}
+            >
+              <Link className="menu-item" to="/room">
+                <div className="d-flex flex-row">
+                  <div className="menu-item-icon">
+                    <img
+                      src={require("../images/r.png")}
+                      width="50px"
+                      alt="notes"
+                      height="50px"
+                    />
+                  </div>
+                  <div className="menu-item-text">Rooms</div>
                 </div>
-                {(open ? (<div className="menu-item-text">
-                  Help
-              </div>) : null)}
               </Link>
 
-              {/*<Link className="menu-item" to="/">
+              <Link className="menu-item" to="/xlist">
+                <div className="d-flex flex-row">
+                  <div className="menu-item-icon">
+                    <img
+                      src={require("../images/x.png")}
+                      width="50px"
+                      alt="notes"
+                      height="50px"
+                    />
+                  </div>
+                  <div className="menu-item-text">X-List</div>{" "}
+                </div>
+              </Link>
+
+              <Link className="menu-item" to="/poll-item">
+                <div className="d-flex flex-row">
+                  <div className="menu-item-icon">
+                    <img
+                      src={require("../images/p.png")}
+                      width="50px"
+                      alt="notes"
+                      height="50px"
+                    />
+                  </div>
+                  <div className="menu-item-text">Poll-Items</div>
+                </div>
+              </Link>
+
+              <div className="d-flex flex-column" style={{ marginTop: "auto" }}>
+                <hr width="50px" />
+
+                <Link className="menu-item" to="/help">
+                  <div className="d-flex flex-row">
+                    <div className="menu-item-icon">
+                      <img
+                        src={require("../images/help.png")}
+                        width="50px"
+                        alt="notes"
+                        height="50px"
+                      />
+                    </div>
+                    <div className="menu-item-text">Help</div>
+                  </div>
+                </Link>
+
+                {/*<Link className="menu-item" to="/">
                 <div className="menu-item-icon" onClick={this.logout}>
                   <img
                     src={require('../images/logout.png')}
@@ -123,21 +129,25 @@ class Scrollspy extends React.Component {
                   Log Out
                 </div>) : null)}
               </Link> */}
-            </div>
-
-          </ul>
-
-        </div>
+              </div>
+            </ul>
+          </div>
+        ) : null}
       </div>
     );
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     menu_disp: state.toggle_menu
   };
 };
 
 // use of withRouter is due to the fact that we need a history props
-export default withRouter(connect(mapStateToProps, { toggle_menu, logout })(Scrollspy));
+export default withRouter(
+  connect(
+    mapStateToProps,
+    { toggle_menu, logout }
+  )(Scrollspy)
+);
